@@ -19,8 +19,8 @@ passport.deserializeUser(function (obj, done) {
 });
 
 passport.use(new SteamStrategy({
-        returnURL: 'http://localhost:3000/auth/steam/return',
-        realm: 'http://localhost:3000',
+        returnURL: 'http://www.steamoverload.com/auth/steam/return',
+        realm: 'http://www.steamoverload.com',
         apiKey: process.argv[2]
     },
     function (identifier, profile, done) {
@@ -150,6 +150,21 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
         collection.remove(object, {}, function () {
         });
     };
+
+    // Force the user on to the www subdomain.
+    app.get('/*', function (req, res, next) {
+        if (req.headers.host.match(/^www/) === null ) {
+            if (process.argv.indexOf('debug') === -1) {
+                res.redirect(301, 'http://www.' + req.headers.host + req.url);
+            }
+            else {
+                return next();
+            }
+        }
+        else {
+            return next();
+        }
+    });
 
     app.get('/', function (req, res) {
         res.render('index', { user: req.user });
