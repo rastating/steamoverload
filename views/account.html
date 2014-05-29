@@ -1,0 +1,91 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="loading-notice">
+            <i class="fa fa-spin fa-cog fa-6" style="font-size: 20em;"></i>
+            <p class="lead">
+                I'm loading your library, please wait one moment...
+            </p>
+        </div>
+        <div class="library-thumbnails">
+            {{#each library.games}}
+                <div class="game-thumbnail">
+                    <img class="game-thumbnail" src="http://media.steampowered.com/steamcommunity/public/images/apps/{{appid}}/{{img_logo_url}}.jpg" />
+
+                    {{#if completed}}
+                        <div class="thumbnail-overlay completed">
+                    {{else}}
+                        <div class="thumbnail-overlay">
+                    {{/if}}
+                        <!--<i class="fa fa-search-plus"></i>-->
+                        <label class="checkbox" for="{{appid}}">
+                            {{#if completed}}
+                                <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                            {{else}}
+                                <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                            {{/if}}
+                          Completed
+                        </label>
+                    </div>
+                </div>
+            {{/each}}
+
+            <div style="clear: both;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var thumbnail_count = {{library.game_count}};
+        var loaded_count = 0;
+
+        $(".game-thumbnail").load(function (e) {
+            loaded_count += 1;
+            console.log('loaded ' + loaded_count + ' images');
+            if (loaded_count === thumbnail_count) {
+                $('.loading-notice').fadeOut(300, function () {
+                    $('.library-thumbnails').fadeIn(1000);
+                });
+            }
+        });
+
+        $(':checkbox').checkbox();
+
+        $('.game-thumbnail').hover(function() {
+            if (!$(this).find('.thumbnail-overlay').hasClass('completed')) {
+                $(this).find('.thumbnail-overlay').stop().fadeIn(200);
+            }
+        },
+        function () {
+            if (!$(this).find('.thumbnail-overlay').hasClass('completed')) {
+                $(this).find('.thumbnail-overlay').stop().fadeOut(200);
+            }
+        });
+
+        $('.thumbnail-overlay').click(function (e) {
+            console.log('click');
+            e.stopPropagation();
+            $(this).find(':checkbox').checkbox('toggle');
+        });
+
+        $(':checkbox').on('toggle', function() {
+            var app_id = $(this).attr('id');
+            var set_as_completed = $(this).attr('checked');
+            var post_data = { "app_id": app_id };
+
+            if (set_as_completed) {
+                //$.post('/api/complete', { "app_id": app_id });
+                $.ajax({
+                    url: '/api/complete',
+                    type: "POST",
+                    contentType:"application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(post_data)
+                });
+            }
+            else {
+                $.post('/api/uncomplete', { "app_id": app_id });
+            }
+        });
+    });
+</script>

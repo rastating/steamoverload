@@ -1,0 +1,146 @@
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 80px;
+}
+        
+#footer {
+    position: absolute;
+    bottom: 0;
+    height: 70px;
+    background-color: #f5f5f5;
+}
+
+.header {
+    padding-top: 100px; 
+    padding-bottom: 100px;
+    text-align: center;
+}
+
+#footer .container .text-muted  {
+    text-align: right; 
+    padding-top: 20px;
+}
+
+.header.slim div img {
+    float: left;
+    height: 40px;
+}
+
+.header.slim div .nav-buttons {
+    float: right;
+}
+
+.header.slim {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.library-thumbnails {
+    display: none;
+    margin: 0 auto;
+}
+
+.loading-notice {
+    text-align: center;
+}
+
+.thumbnail-overlay {
+    /*
+    color: #ffffff;
+    text-align: center;
+    background-color: #000000;
+    opacity: 0.75;
+    
+    */
+
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    color: #ffffff;
+
+    /* default fallback */
+    background: rgb(0, 0, 0) transparent;
+    /* nice browsers */
+    background: rgba(0, 0, 0, 0.75);
+    /* IE 6/7 */
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#f2FFFFFF, endColorstr=#f2FFFFFF);
+    /* IE8 */    
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#f2FFFFFF, endColorstr=#f2FFFFFF)";
+}
+
+label.checkbox {
+    cursor: pointer;
+}
+
+.thumbnail-overlay .fa {
+    height: 69px;
+    line-height: 69px;
+    font-size: 28px;
+}
+
+.game-thumbnail {
+    display: inline-block;
+    float: left;
+    position: relative;
+    cursor: pointer;
+}
+
+.thumbnail-overlay .title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.game-detail-panel {
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    opacity: 0;
+    display: none;
+    background-color: #000000;
+    z-index: 999;
+    color: #ffffff;
+}
+
+.thumbnail-overlay .checkbox {
+    display: block;
+    width: 100px;
+    margin: 0 auto;
+    margin-top: 25px;
+}
+
+.thumbnail-overlay.completed {
+    display: block;
+}
+
+@media only screen and (min-width : 480px) {
+    .library-thumbnails {
+        width: 555px;
+    }
+}
+
+@media only screen and (min-width : 768px) {
+    .library-thumbnails {
+        width: 740px;
+    }
+}
+
+@media only screen and (min-width : 992px) {
+    .library-thumbnails {
+        width: 922px;
+    }
+}
+
+@media only screen and (min-width : 1200px) {
+    .library-thumbnails {
+        width: 1105px;
+    }
+}
