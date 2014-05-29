@@ -18,16 +18,30 @@ passport.deserializeUser(function (obj, done) {
     done(null, obj);
 });
 
-passport.use(new SteamStrategy({
-        returnURL: 'http://www.steamoverload.com/auth/steam/return',
-        realm: 'http://www.steamoverload.com',
-        apiKey: process.argv[2]
-    },
-    function (identifier, profile, done) {
-        profile.identifier = identifier;
-        return done(null, profile);
-    }
-));
+if (process.argv.indexOf('debug') === -1) {
+    passport.use(new SteamStrategy({
+            returnURL: 'http://www.steamoverload.com/auth/steam/return',
+            realm: 'http://www.steamoverload.com',
+            apiKey: process.argv[2]
+        },
+        function (identifier, profile, done) {
+            profile.identifier = identifier;
+            return done(null, profile);
+        }
+    ));
+}
+else {
+    passport.use(new SteamStrategy({
+            returnURL: 'http://localhost:3000/auth/steam/return',
+            realm: 'http://localhost:3000',
+            apiKey: process.argv[2]
+        },
+        function (identifier, profile, done) {
+            profile.identifier = identifier;
+            return done(null, profile);
+        }
+    ));
+}
 
 // Initialise Express and its middleware.
 var app = express();
@@ -63,15 +77,32 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
 
         api.call(method, args, function (error, result) {
             if (!error) {
+
+                var library = null;
+
+                // If result or the games property is undefined, then the user's profile is private.
+                // in this case, create the holding document for their steam id but don't attempt to
+                // process any games.
+                if (!result || !result.games) {
+                    library = {
+                        steam_id: steam_id,
+                        games: [],
+                        game_count: 0,
+                        cached_at: Date.now()
+                    };
+                }
+                else {
+                    library = {
+                        steam_id: steam_id,
+                        games: result.games,
+                        game_count: result.game_count,
+                        cached_at: Date.now()
+                    };
+                }
+
                 var criteria = { steam_id: steam_id };
                 var collection = db.collection('libraries');
-                var library = {
-                    steam_id: steam_id,
-                    games: result.games,
-                    game_count: result.game_count,
-                    cached_at: Date.now()
-                };
-
+                
                 for (var i = 0; i < library.games.length; i++) {
                     if (!library.games[i].img_logo_url) {
                         library.games.removeAt(i);

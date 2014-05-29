@@ -7,26 +7,44 @@
             </p>
         </div>
         <div class="library-thumbnails">
-            {{#each library.games}}
-                <div class="game-thumbnail">
-                    <img class="game-thumbnail" src="http://media.steampowered.com/steamcommunity/public/images/apps/{{appid}}/{{img_logo_url}}.jpg" />
+            {{#if library.games}}
+                {{#each library.games}}
+                    <div class="game-thumbnail">
+                        <img class="game-thumbnail" src="http://media.steampowered.com/steamcommunity/public/images/apps/{{appid}}/{{img_logo_url}}.jpg" />
 
-                    {{#if completed}}
-                        <div class="thumbnail-overlay completed">
-                    {{else}}
-                        <div class="thumbnail-overlay">
-                    {{/if}}
-                        <label class="checkbox">
-                            {{#if completed}}
-                                <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
-                            {{else}}
-                                <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
-                            {{/if}}
-                          Completed
-                        </label>
+                        {{#if completed}}
+                            <div class="thumbnail-overlay completed">
+                        {{else}}
+                            <div class="thumbnail-overlay">
+                        {{/if}}
+                            <label class="checkbox">
+                                {{#if completed}}
+                                    <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                {{else}}
+                                    <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                {{/if}}
+                              Completed
+                            </label>
+                        </div>
                     </div>
+                {{/each}}
+            {{else}}
+                <div style="text-align: center;">
+                    <h2>Your library is empty!</h2>
+                    <p>
+                        This is usually a sign of your Steam profile being set to private rather than public.
+                    </p>
+                    <p>
+                        To set your profile to be public take the following steps:
+                        <ol style="display: inline-block;">
+                            <li>Open up your profile in Steam</li>
+                            <li>Click 'Edit Profile'</li>
+                            <li>Click the 'My Privacy Settings' tab on the right hand side</li>
+                            <li>Choose the 'Public' profile status option and click save</li>
+                        </ol>
+                    </p>
                 </div>
-            {{/each}}
+            {{/if}}
 
             <div style="clear: both;"></div>
         </div>
@@ -35,20 +53,6 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        /*
-        var thumbnail_count = {{library.game_count}};
-        var loaded_count = 0;
-
-        $(".game-thumbnail").load(function (e) {
-            loaded_count += 1;
-            console.log('loaded ' + loaded_count + ' images');
-            if (loaded_count === thumbnail_count) {
-                $('.loading-notice').fadeOut(300, function () {
-                    $('.library-thumbnails').fadeIn(1000);
-                });
-            }
-        });*/
-
         $(window).load(function() {
             $('.loading-notice').fadeOut(300, function () {
                 $('.library-thumbnails').fadeIn(1000);
