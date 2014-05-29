@@ -16,8 +16,7 @@
                     {{else}}
                         <div class="thumbnail-overlay">
                     {{/if}}
-                        <!--<i class="fa fa-search-plus"></i>-->
-                        <label class="checkbox" for="{{appid}}">
+                        <label class="checkbox">
                             {{#if completed}}
                                 <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
                             {{else}}
@@ -36,6 +35,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+        /*
         var thumbnail_count = {{library.game_count}};
         var loaded_count = 0;
 
@@ -47,6 +47,12 @@
                     $('.library-thumbnails').fadeIn(1000);
                 });
             }
+        });*/
+
+        $(window).load(function() {
+            $('.loading-notice').fadeOut(300, function () {
+                $('.library-thumbnails').fadeIn(1000);
+            });
         });
 
         $(':checkbox').checkbox();
@@ -63,7 +69,6 @@
         });
 
         $('.thumbnail-overlay').click(function (e) {
-            console.log('click');
             e.stopPropagation();
             $(this).find(':checkbox').checkbox('toggle');
         });
@@ -73,8 +78,9 @@
             var set_as_completed = $(this).attr('checked');
             var post_data = { "app_id": app_id };
 
+            $(this).parent().parent().toggleClass('completed');
+
             if (set_as_completed) {
-                //$.post('/api/complete', { "app_id": app_id });
                 $.ajax({
                     url: '/api/complete',
                     type: "POST",
@@ -86,6 +92,11 @@
             else {
                 $.post('/api/uncomplete', { "app_id": app_id });
             }
+        });
+
+        $(':checkbox').click(function (e) {
+            e.stopPropagation();
+            return false; 
         });
     });
 </script>

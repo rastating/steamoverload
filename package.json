@@ -11,6 +11,9 @@
         "passport": "0.2.x",
         "passport-openid": "0.3.x",
         "passport-steam": "0.1.x",
-        "sugar": "1.x"
+        "sugar": "1.x",
+        "body-parser": "1.2.x",
+        "cookie-parser": "1.1.x",
+        "express-session": "1.2.x"
     }
 }

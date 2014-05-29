@@ -50,7 +50,7 @@ var ensureAuthenticated = function (req, res, next) {
         return next(); 
     }
   
-    res.redirect('/login')
+    res.redirect('/');
 }
 
 // Open the connection to the database and setup the Express routes.
@@ -120,7 +120,6 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
             else {
                 loadCompletedGames(steam_id, function (error, completed_games) {
                     if (!error && completed_games && completed_games.length > 0) {
-                        console.log(completed_games);
                         for (var game_index = 0; game_index < document.games.length; game_index++) {
                             for (var completed_game_index = 0; completed_game_index < completed_games.length; completed_game_index++) {
                                 if (document.games[game_index].appid == completed_games[completed_game_index].appid) {
@@ -137,6 +136,21 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
         });
     };
 
+    var completeGame = function (steam_id, app_id) {
+        var collection = db.collection('completed_games');
+        var object = { steam_id: steam_id, appid: app_id };
+        collection.update(object, { $set: object }, { upsert: true }, function (error) {
+            console.log(error);
+        });
+    };
+
+    var uncompleteGame = function (steam_id, app_id) {
+        var collection = db.collection('completed_games');
+        var object = { steam_id: steam_id, appid: app_id };
+        collection.remove(object, {}, function () {
+        });
+    };
+
     app.get('/', function (req, res) {
         res.render('index', { user: req.user });
     });
@@ -150,7 +164,16 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
 
     app.post('/api/complete', ensureAuthenticated, function (req, res) {
         var app_id = req.body.app_id;
-        console.log('complete ' + app_id);
+        var steam_id = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+        completeGame(steam_id, app_id);
+        res.send('ok');
+    });
+
+    app.post('/api/uncomplete', ensureAuthenticated, function (req, res) {
+        var app_id = req.body.app_id;
+        var steam_id = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+        uncompleteGame(steam_id, app_id);
+        res.send('ok');
     });
 
     app.get('/login', function(req, res){
