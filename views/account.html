@@ -17,14 +17,24 @@
                         {{else}}
                             <div class="thumbnail-overlay">
                         {{/if}}
-                            <label class="checkbox">
+
+                            {{#if ../read_only}}
                                 {{#if completed}}
-                                    <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
-                                {{else}}
-                                    <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                    <label class="checkbox disabled checked">
+                                        <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox" disabled>
+                                        Completed
+                                    </label>
                                 {{/if}}
-                              Completed
-                            </label>
+                            {{else}}
+                                <label class="checkbox">
+                                    {{#if completed}}
+                                        <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                    {{else}}
+                                        <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                    {{/if}}
+                                    Completed
+                                </label>
+                            {{/if}}
                         </div>
                     </div>
                 {{/each}}
@@ -61,46 +71,48 @@
 
         $(':checkbox').checkbox();
 
-        $('.game-thumbnail').hover(function() {
-            if (!$(this).find('.thumbnail-overlay').hasClass('completed')) {
-                $(this).find('.thumbnail-overlay').stop().fadeIn(200);
-            }
-        },
-        function () {
-            if (!$(this).find('.thumbnail-overlay').hasClass('completed')) {
-                $(this).find('.thumbnail-overlay').stop().fadeOut(200);
-            }
-        });
+        {{#unless read_only}}
+            $('.game-thumbnail').hover(function() {
+                if (!$(this).find('.thumbnail-overlay').hasClass('completed')) {
+                    $(this).find('.thumbnail-overlay').stop().fadeIn(200);
+                }
+            },
+            function () {
+                if (!$(this).find('.thumbnail-overlay').hasClass('completed')) {
+                    $(this).find('.thumbnail-overlay').stop().fadeOut(200);
+                }
+            });
 
-        $('.thumbnail-overlay').click(function (e) {
-            e.stopPropagation();
-            $(this).find(':checkbox').checkbox('toggle');
-        });
+            $('.thumbnail-overlay').click(function (e) {
+                e.stopPropagation();
+                $(this).find(':checkbox').checkbox('toggle');
+            });
 
-        $(':checkbox').on('toggle', function() {
-            var app_id = $(this).attr('id');
-            var set_as_completed = $(this).attr('checked');
-            var post_data = { "app_id": app_id };
+            $(':checkbox').on('toggle', function() {
+                var app_id = $(this).attr('id');
+                var set_as_completed = $(this).attr('checked');
+                var post_data = { "app_id": app_id };
 
-            $(this).parent().parent().toggleClass('completed');
+                $(this).parent().parent().toggleClass('completed');
 
-            if (set_as_completed) {
-                $.ajax({
-                    url: '/api/complete',
-                    type: "POST",
-                    contentType:"application/json; charset=utf-8",
-                    dataType: "json",
-                    data: JSON.stringify(post_data)
-                });
-            }
-            else {
-                $.post('/api/uncomplete', { "app_id": app_id });
-            }
-        });
+                if (set_as_completed) {
+                    $.ajax({
+                        url: '/api/complete',
+                        type: "POST",
+                        contentType:"application/json; charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(post_data)
+                    });
+                }
+                else {
+                    $.post('/api/uncomplete', { "app_id": app_id });
+                }
+            });
 
-        $(':checkbox').click(function (e) {
-            e.stopPropagation();
-            return false; 
-        });
+            $(':checkbox').click(function (e) {
+                e.stopPropagation();
+                return false; 
+            });
+        {{/unless}}
     });
 </script>

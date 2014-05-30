@@ -161,7 +161,9 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
         var collection = db.collection("completed_games");
         var object = { steam_id: steam_id, appid: app_id };
         collection.update(object, { $set: object }, { upsert: true }, function (error) {
-            console.log(error);
+            if (error) {
+                console.log(error);
+            }
         });
     };
 
@@ -188,13 +190,27 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
     });
 
     app.get("/", function (req, res) {
-        res.render("index", { user: req.user });
+        var active_user_id = null;
+        if (req.isAuthenticated()) {
+            active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
+        }
+        res.render("index", { steam_id: active_user_id, user: req.user });
     });
 
-    app.get("/library", ensureAuthenticated, function (req, res) {
-        var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
+    app.get("/user/*", function (req, res) {
+        var steam_id = req.url.replace("/user/", "");
+        var read_only = true;
+        var active_user_id = null;
+
         loadLibrary(steam_id, function (error, library) {
-            res.render("account", { user: req.user, library: library, slim_header: true });
+            if (req.isAuthenticated()) {
+                active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
+                if (steam_id === active_user_id) {
+                    read_only = false;
+                }
+            }
+
+            res.render("account", { steam_id: active_user_id, user: req.user, library: library, slim_header: true, read_only: read_only });
         });
     });
 
