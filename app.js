@@ -1,13 +1,17 @@
-var express = require('express');
-var passport = require('passport');
-var util = require('util');
-var SteamStrategy = require('passport-steam').Strategy;
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var session = require('express-session');
-var api = require('./api');
-var MongoClient = require('mongodb').MongoClient;
-var sugar = require('sugar');
+"use strict";
+
+var express = require("express");
+var passport = require("passport");
+var SteamStrategy = require("passport-steam").Strategy;
+var cookieParser = require("cookie-parser");
+var bodyParser = require("body-parser");
+var session = require("express-session");
+var api = require("./api");
+var MongoClient = require("mongodb").MongoClient;
+var base_uri = process.argv.indexOf("debug") === -1 ? "http://www.steamoverload.com" : "http://localhost:3000";
+
+// Setup Sugar.js extension functions.
+require("sugar");
 
 // Setup PassportJS strategy.
 passport.serializeUser(function (user, done) {
@@ -18,45 +22,31 @@ passport.deserializeUser(function (obj, done) {
     done(null, obj);
 });
 
-if (process.argv.indexOf('debug') === -1) {
-    passport.use(new SteamStrategy({
-            returnURL: 'http://www.steamoverload.com/auth/steam/return',
-            realm: 'http://www.steamoverload.com',
-            apiKey: process.argv[2]
-        },
-        function (identifier, profile, done) {
-            profile.identifier = identifier;
-            return done(null, profile);
-        }
-    ));
-}
-else {
-    passport.use(new SteamStrategy({
-            returnURL: 'http://localhost:3000/auth/steam/return',
-            realm: 'http://localhost:3000',
-            apiKey: process.argv[2]
-        },
-        function (identifier, profile, done) {
-            profile.identifier = identifier;
-            return done(null, profile);
-        }
-    ));
-}
+passport.use(new SteamStrategy({
+        returnURL: base_uri + "/auth/steam/return",
+        realm: base_uri,
+        apiKey: process.argv[2]
+    },
+    function (identifier, profile, done) {
+        profile.identifier = identifier;
+        return done(null, profile);
+    }
+));
 
 // Initialise Express and its middleware.
 var app = express();
-app.set('view engine', 'html');
-app.engine('html', require('hbs').__express);
-app.use('/static', express.static('static'));
+app.set("view engine", "html");
+app.engine("html", require("hbs").__express);
+app.use("/static", express.static("static"));
 app.use(cookieParser());
 app.use(bodyParser());
-app.use(session({ secret: 'keyboard cat' }));
+app.use(session({ secret: "keyboard cat" }));
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Initialise Handlebars
-var hbs = require('hbs');
-hbs.registerPartials('views/partials');
+var hbs = require("hbs");
+hbs.registerPartials("views/partials");
 
 // Route middleware to ensure the user has authenticated via Steam.
 var ensureAuthenticated = function (req, res, next) {
@@ -64,15 +54,15 @@ var ensureAuthenticated = function (req, res, next) {
         return next(); 
     }
   
-    res.redirect('/');
-}
+    res.redirect("/");
+};
 
 // Open the connection to the database and setup the Express routes.
-MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db) {
+MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db) {
 
     // Fetch and cache the user's library from Steam.
     var cacheLibrary = function (steam_id, callback) {
-        var method = api.functions.GetOwnedGames
+        var method = api.functions.GetOwnedGames;
         var args = [{ key: "steamid", value: steam_id }, { key: "include_appinfo", value: 1 }];
 
         api.call(method, args, function (error, result) {
@@ -101,7 +91,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
                 }
 
                 var criteria = { steam_id: steam_id };
-                var collection = db.collection('libraries');
+                var collection = db.collection("libraries");
                 
                 for (var i = 0; i < library.games.length; i++) {
                     if (!library.games[i].img_logo_url) {
@@ -115,18 +105,18 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
                         loadLibrary(steam_id, callback);
                     }
                     else {
-                        callback('Failed to update cache for id ' + steam_id, null);
+                        callback("Failed to update cache for id " + steam_id, null);
                     }
                 });
             }
             else {
-                callback('Failed to fetch library for id ' + steam_id, null);
+                callback("Failed to fetch library for id " + steam_id, null);
             }
         });
     };
 
     var loadCompletedGames = function (steam_id, callback) {
-        var collection = db.collection('completed_games');
+        var collection = db.collection("completed_games");
         var criteria = { steam_id: steam_id };
 
         collection.find(criteria).toArray(function (error, results) {
@@ -134,14 +124,14 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
                 callback(null, results);
             }
             else {
-                callback('Failed to fetch the list of completed games for ' + steam_id, null);
+                callback("Failed to fetch the list of completed games for " + steam_id, null);
             }
         });
     };
     
     // Loads the user's library from the cache in the database.
     var loadLibrary = function (steam_id, callback) {
-        var collection = db.collection('libraries');
+        var collection = db.collection("libraries");
         var criteria = { steam_id: steam_id };
 
         collection.findOne(criteria, function (error, document) {
@@ -168,7 +158,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
     };
 
     var completeGame = function (steam_id, app_id) {
-        var collection = db.collection('completed_games');
+        var collection = db.collection("completed_games");
         var object = { steam_id: steam_id, appid: app_id };
         collection.update(object, { $set: object }, { upsert: true }, function (error) {
             console.log(error);
@@ -176,17 +166,17 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
     };
 
     var uncompleteGame = function (steam_id, app_id) {
-        var collection = db.collection('completed_games');
+        var collection = db.collection("completed_games");
         var object = { steam_id: steam_id, appid: app_id };
         collection.remove(object, {}, function () {
         });
     };
 
     // Force the user on to the www subdomain.
-    app.get('/*', function (req, res, next) {
+    app.get("/*", function (req, res, next) {
         if (req.headers.host.match(/^www/) === null ) {
-            if (process.argv.indexOf('debug') === -1) {
-                res.redirect(301, 'http://www.' + req.headers.host + req.url);
+            if (process.argv.indexOf("debug") === -1) {
+                res.redirect(301, "http://www." + req.headers.host + req.url);
             }
             else {
                 return next();
@@ -197,57 +187,57 @@ MongoClient.connect('mongodb://127.0.0.1:27017/steamoverload', function(err, db)
         }
     });
 
-    app.get('/', function (req, res) {
-        res.render('index', { user: req.user });
+    app.get("/", function (req, res) {
+        res.render("index", { user: req.user });
     });
 
-    app.get('/library', ensureAuthenticated, function (req, res) {
-        var steam_id = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+    app.get("/library", ensureAuthenticated, function (req, res) {
+        var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
         loadLibrary(steam_id, function (error, library) {
-            res.render('account', { user: req.user, library: library, slim_header: true });
+            res.render("account", { user: req.user, library: library, slim_header: true });
         });
     });
 
-    app.post('/api/complete', ensureAuthenticated, function (req, res) {
+    app.post("/api/complete", ensureAuthenticated, function (req, res) {
         var app_id = req.body.app_id;
-        var steam_id = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+        var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
         completeGame(steam_id, app_id);
-        res.send('ok');
+        res.send("ok");
     });
 
-    app.post('/api/uncomplete', ensureAuthenticated, function (req, res) {
+    app.post("/api/uncomplete", ensureAuthenticated, function (req, res) {
         var app_id = req.body.app_id;
-        var steam_id = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+        var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
         uncompleteGame(steam_id, app_id);
-        res.send('ok');
+        res.send("ok");
     });
 
-    app.get('/login', function(req, res){
-        res.render('login', { user: req.user });
+    app.get("/login", function(req, res){
+        res.render("login", { user: req.user });
     });
 
     // Use passport.authenticate() as route middleware to authenticate the request.
-    app.get('/auth/steam', passport.authenticate('steam', { failureRedirect: '/login' }), function (req, res) {
-        res.redirect('/');
+    app.get("/auth/steam", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
+        res.redirect("/");
     });
 
     // Use passport.authenticate() as route middleware to authenticate the request.
     // If authentication fails, the user will be redirected back to the login page.
     // Otherwise, the primary route function function will be called.
-    app.get('/auth/steam/return', passport.authenticate('steam', { failureRedirect: '/login' }), function (req, res) {
-        res.redirect('/');
+    app.get("/auth/steam/return", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
+        res.redirect("/");
     });
 
-    app.get('/logout', function (req, res){
+    app.get("/logout", function (req, res){
         req.logout();
-        res.redirect('/');
+        res.redirect("/");
     });
 });
 
 // Initialise the Steam API module.
 api.initialise(process.argv[2]);
-console.log('[i] Initialised API');
+console.log("[i] Initialised API");
 
 // Begin listening on port 3000 for incoming HTTP reuqests.
 app.listen(3000);
-console.log('[i] Listening on port 3000');
+console.log("[i] Listening on port 3000");
