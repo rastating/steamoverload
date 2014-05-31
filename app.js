@@ -49,7 +49,7 @@ var hbs = require("hbs");
 hbs.registerPartials("views/partials");
 
 // Route middleware to ensure the user has authenticated via Steam.
-var ensureAuthenticated = function (req, res, next) {
+var ensure_authenticated = function (req, res, next) {
     if (req.isAuthenticated()) { 
         return next(); 
     }
@@ -61,7 +61,7 @@ var ensureAuthenticated = function (req, res, next) {
 MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db) {
 
     // Fetch and cache the user's library from Steam.
-    var cacheLibrary = function (steam_id, callback) {
+    var cache_library = function (steam_id, callback) {
         var method = api.functions.GetOwnedGames;
         var args = [{ key: "steamid", value: steam_id }, { key: "include_appinfo", value: 1 }];
 
@@ -102,7 +102,7 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
 
                 collection.update(criteria, { $set: library }, { upsert: true }, function (error) {
                     if (!error) {
-                        loadLibrary(steam_id, callback);
+                        load_library(steam_id, callback);
                     }
                     else {
                         callback("Failed to update cache for id " + steam_id, null);
@@ -115,7 +115,7 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
         });
     };
 
-    var loadCompletedGames = function (steam_id, callback) {
+    var load_completed_games = function (steam_id, callback) {
         var collection = db.collection("completed_games");
         var criteria = { steam_id: steam_id };
 
@@ -130,16 +130,16 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
     };
     
     // Loads the user's library from the cache in the database.
-    var loadLibrary = function (steam_id, callback) {
+    var load_library = function (steam_id, callback) {
         var collection = db.collection("libraries");
         var criteria = { steam_id: steam_id };
 
         collection.findOne(criteria, function (error, document) {
             if (!document || document.cached_at < Date.now() - 300000) {
-                cacheLibrary(steam_id, callback);
+                cache_library(steam_id, callback);
             }
             else {
-                loadCompletedGames(steam_id, function (error, completed_games) {
+                load_completed_games(steam_id, function (error, completed_games) {
                     if (!error && completed_games && completed_games.length > 0) {
                         for (var game_index = 0; game_index < document.games.length; game_index++) {
                             for (var completed_game_index = 0; completed_game_index < completed_games.length; completed_game_index++) {
@@ -151,13 +151,71 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
                         }
                     }
 
+                    document.completed_count = completed_games.length;
+                    document.completion_percent = 0;
+                    if (document.completed_count > 0 && document.game_count > 0) {
+                        document.completion_percent = Math.floor((document.completed_count / document.game_count) * 100);
+                    }
+
                     callback(null, document);
                 });
             }
         });
     };
 
-    var completeGame = function (steam_id, app_id) {
+    var cache_user_data = function (steam_id, callback) {
+        var args = [ { key: "steamids", value: steam_id }];
+        api.call(api.functions.GetPlayerSummaries, args, function (error, result) {
+            if (!error) {
+                var collection = db.collection("users");
+                var user = {};
+
+                if (result.players && result.players.length > 0) {
+                    user = result.players[0];
+                }
+
+                user.steam_id = steam_id;
+                user.cached_at = Date.now();
+
+                collection.update({ steam_id: steam_id }, { $set: user }, { upsert: true }, function (error) {
+                    if (!error) {
+                        load_user_data(steam_id, callback);
+                    }
+                    else {
+                        callback("Failed to update cache for user " + steam_id, null);
+                    }
+                });
+            }
+            else {
+                callback("Failed to fetch user information for user " + steam_id, null);
+            }
+        });
+    };
+
+    // Load the user's profile data e.g. avatar, username etc.
+    var load_user_data = function (steam_id, callback) {
+        var collection = db.collection("users");
+        var criteria = { steam_id: steam_id };
+
+        collection.findOne(criteria, function (error, document) {
+            if (!document || document.cached_at < Date.now() - 300000) {
+                cache_user_data(steam_id, callback);
+            }
+            else {
+                var user = {
+                    id: steam_id,
+                    username: document.personaname,
+                    avatar_small: document.avatar,
+                    avatar_medium: document.avatarmedium,
+                    avatar_large: document.avatarfull
+                };
+
+                callback(false, user);
+            }
+        });
+    };
+
+    var complete_game = function (steam_id, app_id) {
         var collection = db.collection("completed_games");
         var object = { steam_id: steam_id, appid: app_id };
         collection.update(object, { $set: object }, { upsert: true }, function (error) {
@@ -167,7 +225,7 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
         });
     };
 
-    var uncompleteGame = function (steam_id, app_id) {
+    var uncomplete_game = function (steam_id, app_id) {
         var collection = db.collection("completed_games");
         var object = { steam_id: steam_id, appid: app_id };
         collection.remove(object, {}, function () {
@@ -202,7 +260,7 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
         var read_only = true;
         var active_user_id = null;
 
-        loadLibrary(steam_id, function (error, library) {
+        load_library(steam_id, function (error, library) {
             if (req.isAuthenticated()) {
                 active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
                 if (steam_id === active_user_id) {
@@ -210,21 +268,32 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
                 }
             }
 
-            res.render("account", { steam_id: active_user_id, user: req.user, library: library, slim_header: true, read_only: read_only });
+            load_user_data(steam_id, function (error, user) {
+                if (!error) {
+                    res.render("account", { 
+                        steam_id: active_user_id, 
+                        user: req.user, 
+                        player: user,
+                        library: library, 
+                        slim_header: true, 
+                        read_only: read_only 
+                    });
+                }
+            });
         });
     });
 
-    app.post("/api/complete", ensureAuthenticated, function (req, res) {
+    app.post("/api/complete", ensure_authenticated, function (req, res) {
         var app_id = req.body.app_id;
         var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-        completeGame(steam_id, app_id);
+        complete_game(steam_id, app_id);
         res.send("ok");
     });
 
-    app.post("/api/uncomplete", ensureAuthenticated, function (req, res) {
+    app.post("/api/uncomplete", ensure_authenticated, function (req, res) {
         var app_id = req.body.app_id;
         var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-        uncompleteGame(steam_id, app_id);
+        uncomplete_game(steam_id, app_id);
         res.send("ok");
     });
 

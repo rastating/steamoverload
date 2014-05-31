@@ -4,12 +4,14 @@ var request = require("request");
 var key = "";
 var urls = [];
 var functions = { 
-    GetOwnedGames: 1
+    GetOwnedGames: 1,
+    GetPlayerSummaries: 2
 };
 
 var initialise = function (apiKey) {
     key = apiKey;
     urls[functions.GetOwnedGames] = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v1?key=" + apiKey;
+    urls[functions.GetPlayerSummaries] = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey;
 };
 
 var call = function (func, args, callback) {

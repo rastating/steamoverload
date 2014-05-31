@@ -118,6 +118,14 @@ label.checkbox {
     .library-thumbnails {
         width: 555px;
     }
+
+    h2.username {
+        margin-bottom: 5px;
+    }
+
+    .summary p.lead {
+        margin-bottom: 20px;
+    }
 }
 
 @media only screen and (min-width : 768px) {
@@ -136,4 +144,13 @@ label.checkbox {
     .library-thumbnails {
         width: 1105px;
     }
+}
+
+.summary {
+    padding-bottom: 25px;
+}
+
+.summary .avatar {
+    float: left;
+    margin-right: 25px;
 }

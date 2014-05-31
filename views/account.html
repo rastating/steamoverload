@@ -7,6 +7,19 @@
             </p>
         </div>
         <div class="library-thumbnails">
+            <div class="summary">
+                <img src="{{player.avatar_large}}" class="avatar img-rounded img-responsive" />
+                <h2 class="username">{{player.username}}</h2>
+                <p class="lead">
+                    Completed {{library.completed_count}}/{{library.game_count}} games ({{library.completion_percent}}%)
+                </p>
+                <div class="progress">
+                    <div class="progress-bar" style="width: {{library.completion_percent}}%;"></div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+
             {{#if library.games}}
                 {{#each library.games}}
                     <div class="game-thumbnail">
