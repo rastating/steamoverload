@@ -60,6 +60,15 @@ var ensure_authenticated = function (req, res, next) {
 // Open the connection to the database and setup the Express routes.
 MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db) {
 
+    // Cache the app document for quick access to thumbnails.
+    var create_app_document = function (document) {
+        db.collection("games").update({ appid: document.appid }, { $set: document }, { upsert: true }, function (error) {
+            if (error) {
+                console.log("[e] Failed to cache app " + document.appid);
+            }
+        });
+    };
+
     // Fetch and cache the user's library from Steam.
     var cache_library = function (steam_id, callback) {
         var method = api.functions.GetOwnedGames;
@@ -97,6 +106,9 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
                     if (!library.games[i].img_logo_url) {
                         library.games.removeAt(i);
                         library.game_count -= 1;
+                    }
+                    else {
+                        create_app_document(library.games[i]);
                     }
                 }
 
@@ -215,9 +227,44 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
         });
     };
 
+    var load_game_info = function (app_ids, callback) {
+        var criteria = { appid: { $in: app_ids } };
+        db.collection("games").find(criteria).toArray(function (error, results) {
+            callback(error, results);
+        });
+    };
+
+    var load_latest_completions = function (callback) {
+        db.collection("completed_games").find({}).limit(4).sort({ completed_at: -1 }).toArray(function (error, documents) {
+            if (error) {
+                callback(error, null);
+            }
+            else {
+                var app_ids = [];
+                for (var i = 0; i < documents.length; i++) {
+                    app_ids.push(parseInt(documents[i].appid));
+                }
+
+                load_game_info(app_ids, function (error, results) {
+                    console.log(results);
+                    for (var complete_index = 0; complete_index < documents.length; complete_index++) {
+                        for (var game_index = 0; game_index < results.length; game_index++) {
+                            if (parseInt(documents[complete_index].appid) === parseInt(results[game_index].appid)) {
+                                documents[complete_index].game_info = results[game_index];
+                                break;
+                            }
+                        }
+                    }
+
+                    callback(false, documents);
+                });
+            }
+        });
+    };
+
     var complete_game = function (steam_id, app_id) {
         var collection = db.collection("completed_games");
-        var object = { steam_id: steam_id, appid: app_id };
+        var object = { steam_id: steam_id, appid: app_id, completed_at: Date.now() };
         collection.update(object, { $set: object }, { upsert: true }, function (error) {
             if (error) {
                 console.log(error);
@@ -252,7 +299,21 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
         if (req.isAuthenticated()) {
             active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
         }
-        res.render("index", { steam_id: active_user_id, user: req.user });
+
+        load_latest_completions(function (error, latest_completions) {
+            var users_loaded = 0;
+            latest_completions.forEach(function (game) {
+                load_user_data(game.steam_id, function (error, user) {
+                    game.user = user;
+                    users_loaded += 1;
+
+                    if (users_loaded === latest_completions.length) {
+                        console.log(latest_completions);
+                        res.render("index", { steam_id: active_user_id, latest_completions: latest_completions, user: req.user });
+                    }
+                });
+            });
+        });
     });
 
     app.get("/user/*", function (req, res) {

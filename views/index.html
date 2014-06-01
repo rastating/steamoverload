@@ -1,18 +1,11 @@
 <div class="row">
     <div class="col-md-7">
         <h2 class="lead">Recent Activity</h2>
-        <div>
-            <img src="http://media.steampowered.com/steamcommunity/public/images/avatars/45/459bb8a79cb3b080ec746e47c8c377161f0b957a.jpg" /> <a>Phyushin</a> completed <a>Hitman: Absolution</a>.
-        </div>
-        <div>
-            <img src="http://media.steampowered.com/steamcommunity/public/images/avatars/42/422ca2791b1a5a527ae3b30a4d17791a00e3a590.jpg" /> <a>rastating</a> completed <a>Super Street Fighter 4: Arcade Edition</a>.
-        </div>
-        <div>
-            <img src="http://media.steampowered.com/steamcommunity/public/images/avatars/42/422ca2791b1a5a527ae3b30a4d17791a00e3a590.jpg" /> <a>rastating</a> completed <a>Super Meatboy</a>.
-        </div>
-        <div>
-            <img src="http://media.steampowered.com/steamcommunity/public/images/avatars/31/31466bfbfe84f6de72acab3334863ac0cceceef4.jpg" /> <a>Nikolai5</a> completed <a>Tropico 5</a>.
-        </div>
+        {{#each latest_completions}}
+            <div>
+                <img src="{{user.avatar_small}}" /> <a href="/user/{{steam_id}}">{{user.username}}</a> completed <a href="http://store.steampowered.com/app/{{appid}}/" target="_blank">{{game_info.name}}</a>.
+            </div>
+        {{/each}}
     </div>
     <div class="col-md-5">
         <h2 class="lead">Most Completed Games</h2>
