@@ -9,18 +9,11 @@
     </div>
     <div class="col-md-5">
         <h2 class="lead">Most Completed Games</h2>
-        <div>
-            <img src="http://media.steampowered.com/steamcommunity/public/images/apps/8980/eb45fb32b7f4e75564a30a52aa3c35a191253ea0.jpg" /> Borderlands (93%)
-        </div>
-        <div>
-            <img src="http://media.steampowered.com/steamcommunity/public/images/apps/10180/ad502494f1658220f9166c7e17ac90422bf6a479.jpg" /> Call of Duty: Modern Warfare 2 (87%)
-        </div>
-        <div>
-            <img src="http://media.steampowered.com/steamcommunity/public/images/apps/72850/b9aca8a189abd8d6aaf09047dbb0f57582683e1c.jpg" /> The Elder Scrolls V: Skyrim (85%)
-        </div>
-        <div>
-            <img src="http://media.steampowered.com/steamcommunity/public/images/apps/98800/4924fdf2a9c2cf45bd7d1dcfaa4c039c60b9d410.jpg" /> Dungeons of Dredmor (77%)
-        </div>
+        {{#each most_completed}}
+            <div>
+                <img src="http://media.steampowered.com/steamcommunity/public/images/apps/{{game_info.appid}}/{{game_info.img_icon_url}}.jpg" /> {{game_info.name}} ({{percentage}}%)
+            </div>
+        {{/each}}
     </div>
 </div>
 <div class="row">
