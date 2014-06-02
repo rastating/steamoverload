@@ -50,7 +50,7 @@ hbs.registerPartials("views/partials");
 
 // Route middleware to ensure the user has authenticated via Steam.
 var ensure_authenticated = function (req, res, next) {
-    if (req.isAuthenticated()) { 
+    if (req.isAuthenticated()) {
         return next(); 
     }
   

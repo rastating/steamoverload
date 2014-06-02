@@ -23,23 +23,50 @@
   </head>
   <body>
     <div class="container">
-        <div class="row header">
-            <div class="col-md-9">
-                <h1 class="title"><i class="fa fa-steam"></i> SteamOverload.com</h1>
-                <p class="slogan">
-                    keep track of your Steam library.
-                </p>
+        {{#unless slim_header}}
+            <div class="row header">
+                <div class="col-md-9">
+                    <h1 class="title"><i class="fa fa-steam hidden-xs"></i> SteamOverload.com</h1>
+                    <p class="slogan">
+                        keep track of your Steam library.
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    {{#if user}}
+                        <a href="/user/{{steam_id}}" class="btn btn-lg btn-info btn-block btn-signin"><i class="fa fa-hdd-o"></i> &nbsp;My Library</a>
+                        <a href="/logout" class="btn btn-lg btn-danger btn-block"><i class="fa fa-sign-out"></i> &nbsp;Sign Out</a>
+                    {{else}}
+                        <a href="/auth/steam" class="btn btn-lg btn-info btn-block btn-signin"><i class="fa fa-sign-in"></i> &nbsp;Sign in using Steam</a>
+                        <a href="https://github.com/rastating/steamoverload" class="btn btn-lg btn-warning btn-block"><i class="fa fa-github-alt"></i> &nbsp;Report a Problem</a>
+                    {{/if}}
+                </div>
             </div>
-            <div class="col-md-3">
-                <a href="/auth/steam" class="btn btn-lg btn-info btn-block btn-signin"><i class="fa fa-sign-in"></i> &nbsp;Sign in using Steam</a>
-                <a href="" class="btn btn-lg btn-warning btn-block"><i class="fa fa-github-alt"></i> &nbsp;Report a Problem</a>
+            <div class="row">
+                <div class="col-md-12">
+                    <hr>   
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <hr>   
+        {{else}}
+            <div class="row header slim">
+                <div class="col-md-12">
+                    <a href="/" class="btn btn-inverse btn-lg pull-left"><i class="fa fa-steam"></i> SteamOverload.com</a>
+                    <div class="pull-right">
+                        {{#if user}}
+                            <a href="/user/{{steam_id}}" class="btn btn-lg btn-info"><i class="fa fa-hdd-o"></i> &nbsp;My Library</a>
+                            <a href="/logout" class="btn btn-lg btn-danger"><i class="fa fa-sign-out"></i> &nbsp;Sign Out</a>
+                        {{else}}
+                            <a href="/auth/steam" class="btn btn-lg btn-info"><i class="fa fa-sign-in"></i> &nbsp;Sign in using Steam</a>
+                            <a href="https://github.com/rastating/steamoverload" class="btn btn-lg btn-warning"><i class="fa fa-github-alt"></i> &nbsp;Report a Problem</a>
+                        {{/if}}
+                    </div>
+                </div>
             </div>
-        </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <hr>   
+                </div>
+            </div>
+        {{/unless}}
         
         {{{body}}}
 
