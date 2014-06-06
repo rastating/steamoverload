@@ -9,6 +9,7 @@ var session = require("express-session");
 var api = require("./api");
 var MongoClient = require("mongodb").MongoClient;
 var base_uri = process.argv.indexOf("debug") === -1 ? "http://www.steamoverload.com" : "http://localhost:3000";
+var library = require("./library");
 
 // Setup Sugar.js extension functions.
 require("sugar");
@@ -59,122 +60,7 @@ var ensure_authenticated = function (req, res, next) {
 
 // Open the connection to the database and setup the Express routes.
 MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db) {
-
-    // Cache the app document for quick access to thumbnails.
-    var create_app_document = function (document) {
-        db.collection("games").update({ appid: document.appid }, { $set: document }, { upsert: true }, function (error) {
-            if (error) {
-                console.log("[e] Failed to cache app " + document.appid);
-            }
-        });
-    };
-
-    // Fetch and cache the user's library from Steam.
-    var cache_library = function (steam_id, callback) {
-        var method = api.functions.GetOwnedGames;
-        var args = [{ key: "steamid", value: steam_id }, { key: "include_appinfo", value: 1 }];
-
-        api.call(method, args, function (error, result) {
-            if (!error) {
-
-                var library = null;
-
-                // If result or the games property is undefined, then the user's profile is private.
-                // in this case, create the holding document for their steam id but don't attempt to
-                // process any games.
-                if (!result || !result.games) {
-                    library = {
-                        steam_id: steam_id,
-                        games: [],
-                        game_count: 0,
-                        cached_at: Date.now()
-                    };
-                }
-                else {
-                    library = {
-                        steam_id: steam_id,
-                        games: result.games,
-                        game_count: result.game_count,
-                        cached_at: Date.now()
-                    };
-                }
-
-                var criteria = { steam_id: steam_id };
-                var collection = db.collection("libraries");
-                
-                for (var i = 0; i < library.games.length; i++) {
-                    if (!library.games[i].img_logo_url) {
-                        library.games.removeAt(i);
-                        library.game_count -= 1;
-                    }
-                    else {
-                        create_app_document(library.games[i]);
-                    }
-                }
-
-                collection.update(criteria, { $set: library }, { upsert: true }, function (error) {
-                    if (!error) {
-                        load_library(steam_id, callback);
-                    }
-                    else {
-                        callback("Failed to update cache for id " + steam_id, null);
-                    }
-                });
-            }
-            else {
-                callback("Failed to fetch library for id " + steam_id, null);
-            }
-        });
-    };
-
-    var load_completed_games = function (steam_id, callback) {
-        var collection = db.collection("completed_games");
-        var criteria = { steam_id: steam_id };
-
-        collection.find(criteria).toArray(function (error, results) {
-            if (!error) {
-                callback(null, results);
-            }
-            else {
-                callback("Failed to fetch the list of completed games for " + steam_id, null);
-            }
-        });
-    };
     
-    // Loads the user's library from the cache in the database.
-    var load_library = function (steam_id, callback) {
-        var collection = db.collection("libraries");
-        var criteria = { steam_id: steam_id };
-
-        collection.findOne(criteria, function (error, document) {
-            if (!document || document.cached_at < Date.now() - 300000) {
-                cache_library(steam_id, callback);
-            }
-            else {
-                load_completed_games(steam_id, function (error, completed_games) {
-                    if (!error && completed_games && completed_games.length > 0) {
-                        for (var game_index = 0; game_index < document.games.length; game_index++) {
-                            for (var completed_game_index = 0; completed_game_index < completed_games.length; completed_game_index++) {
-                                if (document.games[game_index].appid == completed_games[completed_game_index].appid) {
-                                    document.games[game_index].completed = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    document.completed_count = completed_games.length;
-                    document.completion_percent = 0;
-                    if (document.completed_count > 0 && document.game_count > 0) {
-                        document.completion_percent = Math.floor((document.completed_count / document.game_count) * 100);
-                    }
-
-                    callback(null, document);
-                });
-            }
-        });
-    };
-
     var cache_user_data = function (steam_id, callback) {
         var args = [ { key: "steamids", value: steam_id }];
         api.call(api.functions.GetPlayerSummaries, args, function (error, result) {
@@ -370,7 +256,7 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
         var read_only = true;
         var active_user_id = null;
 
-        load_library(steam_id, function (error, library) {
+        library.load(db, steam_id, function (error, library) {
             if (req.isAuthenticated()) {
                 active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
                 if (steam_id === active_user_id) {
@@ -432,6 +318,9 @@ MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db)
 // Initialise the Steam API module.
 api.initialise(process.argv[2]);
 console.log("[i] Initialised API");
+
+library.api = api;
+console.log("[i] Initialised Library module");
 
 // Begin listening on port 3000 for incoming HTTP reuqests.
 app.listen(3000);
