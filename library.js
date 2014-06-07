@@ -110,6 +110,110 @@ var load_library = function (db, steam_id, callback) {
     });
 };
 
+var load_game = function (db, app_id, callback) {
+    var criteria = { appid: app_id };
+    db.collection("games").findOne(criteria, function (error, result) {
+        callback(error, result);
+    });
+};
+
+var load_games = function (db, app_ids, callback) {
+    var criteria = { appid: { $in: app_ids } };
+    db.collection("games").find(criteria).toArray(function (error, results) {
+        callback(error, results);
+    });
+};
+
+var load_latest_completions = function (db, callback) {
+    db.collection("completed_games").find({}).limit(4).sort({ completed_at: -1 }).toArray(function (error, completed_games) {
+        if (error) {
+            callback(error, null);
+        }
+        else {
+            var app_ids = [];
+            for (var i = 0; i < completed_games.length; i++) {
+                app_ids.push(completed_games[i].appid);
+            }
+
+            // Map the game info to the completed game document.
+            load_games(db, app_ids, function (error, games) {
+                completed_games.forEach(function (completed_game) {
+                    games.some(function (game) {
+                        if (completed_game.appid === game.appid) {
+                            completed_game.game_info = game;
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                    });
+                });
+
+                callback(false, completed_games);
+            });
+        }
+    });
+};
+
+var get_library_count = function (db, callback) {
+    db.collection("libraries").count(function (error, count) {
+        callback(count);
+    });
+};
+
+var load_most_completed_games = function (db, callback) {
+    var criteria = [
+        {
+            $group: {
+                _id: "$appid",
+                count: { $sum: 1 }
+            }
+        },
+        {
+            $sort: {
+                count: -1
+            }
+        },
+        {
+            $limit: 4
+        }
+    ];
+
+    db.collection("completed_games").aggregate(criteria, function (error, results) {
+        get_library_count(db, function (library_count) {
+            results.forEach(function (result) {
+                load_game(db, result._id, function (error, game) {
+                    result.game_info = game;
+                    result.percentage = Math.floor((result.count / library_count) * 100);
+                });
+            });
+
+            callback(false, results);
+        });
+    });
+};
+
+var complete_game = function (db, steam_id, app_id) {
+    var collection = db.collection("completed_games");
+    var object = { steam_id: steam_id, appid: app_id, completed_at: Date.now() };
+    collection.update(object, { $set: object }, { upsert: true }, function (error) {
+        if (error) {
+            console.log(error);
+        }
+    });
+};
+
+var uncomplete_game = function (db, steam_id, app_id) {
+    var collection = db.collection("completed_games");
+    var object = { steam_id: steam_id, appid: app_id };
+    collection.remove(object, {}, function () {
+    });
+};
+
 module.exports.api = null;
 module.exports.cache_timeout = 600000;
+module.exports.complete_game = complete_game;
 module.exports.load = load_library;
+module.exports.load_latest_completions = load_latest_completions;
+module.exports.load_most_completed_games = load_most_completed_games;
+module.exports.uncomplete_game = uncomplete_game;
