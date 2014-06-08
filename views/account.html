@@ -20,6 +20,24 @@
                 <div class="clearfix"></div>
             </div>
 
+            <div class="pull-right">
+                <div class="pagination">
+                    <ul>
+                        <li class="active">
+                            <a href="#" id="list-view-button"><i class="fa fa-list"></i></a>
+                        </li>
+                        <li>
+                            <a href="#" id="big-list-view-button"><i class="fa fa-th-list"></i></a>
+                        </li>
+                        <li>
+                            <a href="#" id="grid-view-button"><i class="fa fa-th"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+
             {{#if library.games}}
                 {{#each library.games}}
                     <div class="game-thumbnail block">
@@ -123,6 +141,17 @@
         });
 
         $(':checkbox').checkbox();
+
+        $('#grid-view-button').click(function (e) {
+            e.preventDefault();
+            var count = $('.game-list-item').length;
+            $('.game-list-item').fadeOut(200, function () {
+                if (count-- === 1) {
+                    $('.game-thumbnail').toggleClass('block').toggleClass('pull-left');
+                    $('.game-tile').fadeIn(200);
+                }
+            });
+        });
 
         {{#unless read_only}}
             $('.game-thumbnail').hover(function() {
