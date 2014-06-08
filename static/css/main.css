@@ -106,7 +106,6 @@ label.checkbox {
 
 .game-thumbnail {
     display: inline-block;
-    float: left;
     position: relative;
     cursor: pointer;
 }
@@ -186,4 +185,27 @@ label.checkbox {
 .summary .avatar {
     float: left;
     margin-right: 25px;
+}
+
+.game-tile {
+    display: none;
+}
+
+.block {
+    display: block !important;
+}
+
+.game-list-item .checkbox.disabled.checked, .game-list-item .fui-checkbox-checked {
+    color: #1abc9c !important;
+}
+
+.game-list-item {
+    border-bottom: #ebedef 1px solid;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.game-list-item .checkbox {
+    margin-bottom: 0px;
+    margin-top: 6px;
 }

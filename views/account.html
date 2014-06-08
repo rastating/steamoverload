@@ -22,32 +22,51 @@
 
             {{#if library.games}}
                 {{#each library.games}}
-                    <div class="game-thumbnail">
-                        <img class="game-thumbnail" src="http://media.steampowered.com/steamcommunity/public/images/apps/{{appid}}/{{img_logo_url}}.jpg" />
+                    <div class="game-thumbnail block">
+                        <div class="game-list-item">
+                            <span class="pull-left">
+                                <span class="icon">
+                                    <img src="http://media.steampowered.com/steamcommunity/public/images/apps/{{appid}}/{{img_icon_url}}.jpg" />
+                                </span>
+                                <span class="name">
+                                    {{name}}
+                                </span>
+                            </span>
+                            <span class="pull-right">
+                                <label class="checkbox disabled checked">
+                                    <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox" disabled>
+                                    Completed
+                                </label>
+                            </span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="game-tile">
+                            <img class="game-thumbnail" src="http://media.steampowered.com/steamcommunity/public/images/apps/{{appid}}/{{img_logo_url}}.jpg" />
 
-                        {{#if completed}}
-                            <div class="thumbnail-overlay completed">
-                        {{else}}
-                            <div class="thumbnail-overlay">
-                        {{/if}}
+                            {{#if completed}}
+                                <div class="thumbnail-overlay completed">
+                            {{else}}
+                                <div class="thumbnail-overlay">
+                            {{/if}}
 
-                            {{#if ../read_only}}
-                                {{#if completed}}
-                                    <label class="checkbox disabled checked">
-                                        <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox" disabled>
+                                {{#if ../read_only}}
+                                    {{#if completed}}
+                                        <label class="checkbox disabled checked">
+                                            <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox" disabled>
+                                            Completed
+                                        </label>
+                                    {{/if}}
+                                {{else}}
+                                    <label class="checkbox">
+                                        {{#if completed}}
+                                            <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                        {{else}}
+                                            <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                        {{/if}}
                                         Completed
                                     </label>
                                 {{/if}}
-                            {{else}}
-                                <label class="checkbox">
-                                    {{#if completed}}
-                                        <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
-                                    {{else}}
-                                        <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
-                                    {{/if}}
-                                    Completed
-                                </label>
-                            {{/if}}
+                            </div>
                         </div>
                     </div>
                 {{/each}}
