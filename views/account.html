@@ -33,10 +33,31 @@
                                 </span>
                             </span>
                             <span class="pull-right">
-                                <label class="checkbox disabled checked">
-                                    <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox" disabled>
-                                    Completed
-                                </label>
+                                {{#if ../read_only}}
+                                    {{#if completed}}
+                                        <label class="checkbox disabled checked">
+                                            <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox" disabled>
+                                            Completed
+                                        </label>
+                                    {{else}}
+                                        <label class="checkbox disabled">
+                                            <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox" disabled>
+                                            Completed
+                                        </label>
+                                    {{/if}}
+                                {{else}}
+                                    {{#if completed}}
+                                        <label class="checkbox checked">
+                                            <input type="checkbox" value="" checked="checked" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                            Completed
+                                        </label>
+                                    {{else}}
+                                        <label class="checkbox">
+                                            <input type="checkbox" value="" name="{{appid}}" id="{{appid}}" data-toggle="checkbox">
+                                            Completed
+                                        </label>
+                                    {{/if}}
+                                {{/if}}
                             </span>
                             <div class="clearfix"></div>
                         </div>

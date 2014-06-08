@@ -44,6 +44,11 @@ var cache_library = function (db, steam_id, callback) {
                 }
             }
 
+            // Sort the owned games by name.
+            library.games = library.games.sortBy(function (game) {
+                return game.name;
+            });
+
             // Update the library and call back into the load_library function if successful.
             collection.update(criteria, { $set: library }, { upsert: true }, function (error) {
                 if (!error) {
