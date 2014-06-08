@@ -136,7 +136,7 @@
                 }
             });
 
-            $('.thumbnail-overlay').click(function (e) {
+            $('.thumbnail-overlay, .game-list-item').click(function (e) {
                 e.stopPropagation();
                 $(this).find(':checkbox').checkbox('toggle');
             });
