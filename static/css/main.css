@@ -187,10 +187,6 @@ label.checkbox {
     margin-right: 25px;
 }
 
-.game-tile {
-    display: none;
-}
-
 .block {
     display: block !important;
 }
@@ -208,4 +204,19 @@ label.checkbox {
 .game-list-item .checkbox {
     margin-bottom: 0px;
     margin-top: 6px;
+}
+
+.game-list-item.big-list .checkbox {
+    margin-top: 20px;
+    padding-left: 40px;
+}
+
+.game-list-item.big-list .checkbox .icons {
+    font-size: 30px !important;
+}
+
+@media (max-width: 767px) {
+    .pagination ul {
+        padding: inherit !important;
+    }
 }
