@@ -33,8 +33,9 @@ var cache_library = function (db, steam_id, callback) {
             // Some non-public games, early releases and betas will come through in the games array.
             // If we are missing a banner, then we should ommit these games, otherwise we'll update
             // our local cache of that game's meta data for quick access to it in other modules.
-            for (var i = 0; i < library.games.length; i++) {
-                if (!library.games[i].img_logo_url) {
+            for (var i = library.games.length - 1; i >= 0; i--) {
+                if (!library.games[i].img_logo_url || !library.games[i].img_icon_url) {
+                    console.log("Remove " + library.games[i].name);
                     library.games.removeAt(i);
                     library.game_count -= 1;
                 }
@@ -42,6 +43,11 @@ var cache_library = function (db, steam_id, callback) {
                     create_app_document(db, library.games[i]);
                 }
             }
+
+            // Sort the owned games by name.
+            library.games = library.games.sortBy(function (game) {
+                return game.name;
+            });
 
             // Update the library and call back into the load_library function if successful.
             collection.update(criteria, { $set: library }, { upsert: true }, function (error) {

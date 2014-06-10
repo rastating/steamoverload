@@ -117,7 +117,10 @@ var start = function () {
                             player: user,
                             library: library, 
                             slim_header: true, 
-                            read_only: read_only 
+                            read_only: read_only,
+                            list_view: req.cookies.view === "list" || !req.cookies.view,
+                            big_list_view: req.cookies.view === "big-list",
+                            tile_view: req.cookies.view === "tile"
                         });
                     }
                 });
@@ -154,9 +157,14 @@ var start = function () {
             res.redirect("/");
         });
 
-        app.get("/logout", function (req, res){
+        app.get("/logout", function (req, res) {
             req.logout();
             res.redirect("/");
+        });
+
+        app.get("/set/view/*", function (req, res) {
+            res.cookie("view", req.url.replace("/set/view/", ""));
+            res.redirect("back");
         });
     });
 
