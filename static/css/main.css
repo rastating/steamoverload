@@ -220,3 +220,7 @@ label.checkbox {
         padding: inherit !important;
     }
 }
+
+.game-list-item:hover {
+    background-color: #f7f7f7;
+}
