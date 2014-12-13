@@ -1,13 +1,13 @@
 "use strict";
 
-var express = require("express");
-var cookieParser = require("cookie-parser");
-var bodyParser = require("body-parser");
-var session = require("express-session");
-var passport = require("passport");
-var SteamStrategy = require("passport-steam").Strategy;
-var base_uri = process.argv.indexOf("debug") === -1 ? "http://www.steamoverload.com" : "http://localhost:3000";
-var MongoClient = require("mongodb").MongoClient;
+var express         = require("express");
+var cookieParser    = require("cookie-parser");
+var bodyParser      = require("body-parser");
+var session         = require("express-session");
+var passport        = require("passport");
+var SteamStrategy   = require("passport-steam").Strategy;
+var base_uri        = process.argv.indexOf("debug") === -1 ? "http://www.steamoverload.com" : "http://localhost:3000";
+var MongoClient     = require("mongodb").MongoClient;
 
 // Setup PassportJS strategy.
 passport.serializeUser(function (user, done) {
@@ -96,8 +96,8 @@ var start = function () {
             });
         });
 
-        app.get("/user/*", function (req, res) {
-            var steam_id = req.url.replace("/user/", "");
+        app.get("/user/:steamid", function (req, res) {
+            var steam_id = req.params.steamid;
             var read_only = true;
             var active_user_id = null;
 
@@ -162,8 +162,8 @@ var start = function () {
             res.redirect("/");
         });
 
-        app.get("/set/view/*", function (req, res) {
-            res.cookie("view", req.url.replace("/set/view/", ""));
+        app.get("/set/view/:value", function (req, res) {
+            res.cookie("view", req.params.value);
             res.redirect("back");
         });
     });
