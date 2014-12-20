@@ -2,11 +2,19 @@
 // MODULE FUNCTIONS
 // ==============================================
 
-var createAppDocument = function (document) {
+var createAppDocument = function (doc) {
     var db = module.exports.db;
-    db.collection("games").update({ appid: document.appid }, { $set: document }, { upsert: true }, function (error) {
+    var game = {
+        "appid": doc.appid,
+        "name": doc.name,
+        "img_icon_url": doc.img_icon_url,
+        "img_logo_url": doc.img_logo_url,
+        "has_community_visible_stats": doc.has_community_visible_stats
+    };
+
+    db.collection("games").update({ "appid": game.appid }, { $set: game }, { upsert: true }, function (error) {
         if (error) {
-            console.log("[e] Failed to cache app " + document.appid);
+            console.log("[e] Failed to cache app " + game.appid);
         }
     });
 };
@@ -195,14 +203,18 @@ var loadMostCompletedGames = function (callback) {
 
     db.collection("completed_games").aggregate(criteria, function (error, results) {
         getLibraryCount(function (libraryCount) {
+            var loaded = 0;
             results.forEach(function (result) {
                 loadGame(result._id, function (error, game) {
                     result.game_info = game;
                     result.percentage = Math.floor((result.count / libraryCount) * 100);
+                    loaded += 1;
+
+                    if (loaded === 4) {
+                        callback(false, results);
+                    }
                 });
             });
-
-            callback(false, results);
         });
     });
 };

@@ -1,15 +1,44 @@
-"use strict";
 
-var express = require("express");
-var cookieParser = require("cookie-parser");
-var bodyParser = require("body-parser");
-var session = require("express-session");
-var passport = require("passport");
-var SteamStrategy = require("passport-steam").Strategy;
-var base_uri = process.argv.indexOf("debug") === -1 ? "http://www.steamoverload.com" : "http://localhost:3000";
-var MongoClient = require("mongodb").MongoClient;
+// BASE SETUP
+// ==============================================
 
-// Setup PassportJS strategy.
+var args            = require('minimist')(process.argv.slice(2));
+var express         = require('express');
+var cookieParser    = require('cookie-parser');
+var bodyParser      = require('body-parser');
+var session         = require('express-session');
+var passport        = require('passport');
+var SteamStrategy   = require('passport-steam').Strategy;
+var MongoClient     = require('mongodb').MongoClient;
+var baseUri         = args.d ? 'http://www.steamoverload.com' : 'http://localhost:3000';
+var key             = args.k;
+var sessionSecret   = args.s;
+var cookieSecret    = args.c;
+var app             = express();
+var router          = express.Router();
+var debugging       = args.d;
+
+app.use(bodyParser.urlencoded({ "extended": false }));
+app.use(bodyParser.json());
+app.use(cookieParser(cookieSecret));
+app.use(session({ "secret": sessionSecret, "saveUninitialized": true, "resave": true }));
+
+
+// AUTHENTICATION MIDDLEWARE
+// ==============================================
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+var isAuthenticated = function (req, res, next) {
+    if (req.isAuthenticated()) {
+        return next(); 
+    }
+    else {
+        res.status(401).send({ "error": true, "message": 'Authentication required' });
+    }
+};
+
 passport.serializeUser(function (user, done) {
     done(null, user);
 });
@@ -19,9 +48,9 @@ passport.deserializeUser(function (obj, done) {
 });
 
 passport.use(new SteamStrategy({
-        returnURL: base_uri + "/auth/steam/return",
-        realm: base_uri,
-        apiKey: process.argv[2]
+        "returnURL": baseUri + '/auth/steam/return',
+        "realm": baseUri,
+        "apiKey": key
     },
     function (identifier, profile, done) {
         profile.identifier = identifier;
@@ -29,48 +58,55 @@ passport.use(new SteamStrategy({
     }
 ));
 
-// Initialise Express and its middleware.
-var app = express();
-app.set("view engine", "html");
-app.engine("html", require("hbs").__express);
-app.use("/static", express.static("static"));
-app.use(cookieParser());
-app.use(bodyParser());
-app.use(session({ secret: "keyboard cat" }));
-app.use(passport.initialize());
-app.use(passport.session());
 
-// Initialise Handlebars
-var hbs = require("hbs");
-hbs.registerPartials("views/partials");
+// STATIC FILE SERVER
+// ==============================================
 
-// Route middleware to ensure the user has authenticated via Steam.
-var ensure_authenticated = function (req, res, next) {
-    if (req.isAuthenticated()) {
-        return next(); 
+app.use('/static', express.static('static'));
+
+
+// ROUTES
+// ==============================================
+
+router.use(function (req, res, next) {
+    console.log(req.method, req.url);
+    next();
+});
+
+
+router.get('/*', function (req, res, next) {
+    if (req.headers.host.match(/^www/) === null ) {
+        if (!debugging) {
+            res.redirect(301, 'http://www.' + req.headers.host + req.url);
+        }
+        else {
+            return next();
+        }
     }
-  
-    res.redirect("/");
-};
+    else {
+        return next();
+    }
+});
 
-var start = function () {
-    // Open the connection to the database and setup the Express routes.
-    MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db) {
+router.get('/api/summary/latest', function (req, res) {
+    module.exports.library.loadMostCompletedGames(function (error, games) {
+        if (error) {
+            res.status(403).send({ "error": true, "message": error });
+        }
+        else {
+            res.send(games);
+        }
+    });
+});
 
-        // Force the user on to the www subdomain.
-        app.get("/*", function (req, res, next) {
-            if (req.headers.host.match(/^www/) === null ) {
-                if (process.argv.indexOf("debug") === -1) {
-                    res.redirect(301, "http://www." + req.headers.host + req.url);
-                }
-                else {
-                    return next();
-                }
-            }
-            else {
-                return next();
-            }
-        });
+router.get('/api/summary/top', function (req, res) {
+
+});
+
+app.use('/', router);
+
+
+/*
 
         app.get("/", function (req, res) {
             var active_user_id = null;
@@ -172,6 +208,25 @@ var start = function () {
     app.listen(3000);
 };
 
+*/
+
+// MODULE FUNCTIONS
+// ==============================================
+
+var listen = function () {
+    MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(error, db) {
+        if (error) {
+            console.log('ERROR: Could not establish a connection to mongodb.');
+        }
+        else {
+            console.log('INFO:  Established connection to mongodb.');
+            module.exports.library.db = db;
+            module.exports.user.db = db;
+            app.listen(3000);
+        }
+    });
+};
+
 module.exports.library = null;
-module.exports.start = start;
+module.exports.listen = listen;
 module.exports.user = null;
