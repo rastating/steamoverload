@@ -1,15 +1,20 @@
-"use strict";
 
-var api = require("./api");
+// BASE SETUP
+// ==============================================
+
+var args    = require('minimist')(process.argv.slice(2));
+var api     = require("./api");
 var library = require("./library");
-var user = require("./user");
-var router = require("./router");
+var user    = require("./user");
+var router  = require("./router");
+var sugar   = require("sugar");
+var key     = args.k;
 
-// Setup Sugar.js extension functions.
-require("sugar");
 
-// Initialise the Steam API module.
-api.initialise(process.argv[2]);
+// LOAD APPLICAITON MODULES
+// ==============================================
+
+api.initialise(key);
 console.log("[i] Initialised API");
 
 library.api = api;
