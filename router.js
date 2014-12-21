@@ -88,19 +88,22 @@ router.get('/*', function (req, res, next) {
     }
 });
 
-router.get('/api/summary/latest', function (req, res) {
-    module.exports.library.loadMostCompletedGames(function (error, games) {
+router.get('/api/summary/:category', function (req, res) {
+    var callback = function (error, games) {
         if (error) {
             res.status(403).send({ "error": true, "message": error });
         }
         else {
             res.send(games);
         }
-    });
-});
+    };
 
-router.get('/api/summary/top', function (req, res) {
-
+    if (req.params.category === 'latest') {
+        module.exports.library.loadLatestCompletions(4, callback);
+    }
+    else if (req.params.category === 'top') {
+        module.exports.library.loadMostCompletedGames(callback);
+    }
 });
 
 app.use('/', router);
