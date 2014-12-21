@@ -99,7 +99,7 @@ router.get('/api/summary/:category', function (req, res) {
     };
 
     if (req.params.category === 'latest') {
-        module.exports.library.loadLatestCompletions(4, callback);
+        module.exports.library.loadLatestCompletions(callback);
     }
     else if (req.params.category === 'top') {
         module.exports.library.loadMostCompletedGames(callback);
@@ -110,30 +110,6 @@ app.use('/', router);
 
 
 /*
-
-        app.get("/", function (req, res) {
-            var active_user_id = null;
-            if (req.isAuthenticated()) {
-                active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-            }
-
-            module.exports.library.load_latest_completions(db, function (error, latest_completions) {
-                var users_loaded = 0;
-                module.exports.library.load_most_completed_games(db, function (error, most_completed) {
-
-                    latest_completions.forEach(function (game) {
-                        module.exports.user.load(db, game.steam_id, function (error, user) {
-                            game.user = user;
-                            users_loaded += 1;
-
-                            if (users_loaded === latest_completions.length) {
-                                res.render("index", { steam_id: active_user_id, latest_completions: latest_completions, most_completed: most_completed, user: req.user });
-                            }
-                        });
-                    });
-                });
-            });
-        });
 
         app.get("/user/*", function (req, res) {
             var steam_id = req.url.replace("/user/", "");

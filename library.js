@@ -1,4 +1,9 @@
 
+// BASE SETUP
+// ==============================================
+var user = require('./user');
+
+
 // MODULE FUNCTIONS
 // ==============================================
 
@@ -143,9 +148,9 @@ var loadGames = function (ids, callback) {
     });
 };
 
-var loadLatestCompletions = function (limit, callback) {
+var loadLatestCompletions = function (callback) {
     var db = module.exports.db;
-    db.collection("completed_games").find({}).limit(limit).sort({ completed_at: -1 }).toArray(function (error, completedGames) {
+    db.collection("completed_games").find({}).limit(4).sort({ completed_at: -1 }).toArray(function (error, completedGames) {
         if (error) {
             callback(error, null);
         }
@@ -155,8 +160,10 @@ var loadLatestCompletions = function (limit, callback) {
                 ids.push(completedGames[i].appid);
             }
 
-            // Map the game info to the completed game document.
+            // Map the game info to the completed game document and the user
+            // that completed it.
             loadGames(ids, function (error, games) {
+                var loaded = 0;
                 completedGames.forEach(function (completedGame) {
                     games.some(function (game) {
                         if (completedGame.appid === game.appid) {
@@ -167,9 +174,16 @@ var loadLatestCompletions = function (limit, callback) {
                             return false;
                         }
                     });
-                });
 
-                callback(false, completedGames);
+                    user.load(completedGame.steam_id, function (error, completer) {
+                        completedGame.user = completer;
+                        loaded += 1;
+
+                        if (loaded === completedGames.length) {
+                            callback(false, completedGames);
+                        }
+                    });
+                });
             });
         }
     });

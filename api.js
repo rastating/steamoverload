@@ -40,7 +40,7 @@ var call = function (url, args, callback) {
 };
 
 var getOwnedGames = function (id, callback) {
-    var url = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v1?key=" + apiKey;
+    var url = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v1?key=" + key;
     var args = [
         { 
             "key": "steamid", 
@@ -56,7 +56,7 @@ var getOwnedGames = function (id, callback) {
 };
 
 var getPlayerSummaries = function (id, callback) {
-    var url = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey;
+    var url = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + key;
     var args = [{ "key": "steamids", "value": id }];
     call(url, args, callback);
 };
