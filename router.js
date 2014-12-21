@@ -62,7 +62,7 @@ passport.use(new SteamStrategy({
 // STATIC FILE SERVER
 // ==============================================
 
-app.use('/static', express.static('static'));
+app.use('/static', express.static('public'));
 
 
 // ROUTES
@@ -104,6 +104,10 @@ router.get('/api/summary/:category', function (req, res) {
     else if (req.params.category === 'top') {
         module.exports.library.loadMostCompletedGames(callback);
     }
+});
+
+router.get('/*', function (req, res) {
+    res.sendfile('index.html', { "root": "./views" });
 });
 
 app.use('/', router);
