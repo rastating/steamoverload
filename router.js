@@ -58,6 +58,14 @@ passport.use(new SteamStrategy({
     }
 ));
 
+app.get("/auth/steam", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
+    res.redirect("/");
+});
+
+app.get("/auth/steam/return", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
+    res.redirect("/");
+});
+
 
 // STATIC FILE SERVER
 // ==============================================

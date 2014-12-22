@@ -32,16 +32,23 @@
 </head>
 <body>
     <div class="container">
-        <div class="row header">
-            <div class="col-md-9">
-                <h1 class="title"><i class="fa fa-steam hidden-xs"></i> SteamOverload.com</h1>
-                <p class="slogan">
-                    keep track of your Steam library.
-                </p>
+        <div class="row header" ng-class="{ 'slim': $root.slimHeader }">
+            <div ng-if="!$root.slimHeader">
+                <div class="col-md-9">
+                    <h1 class="title"><i class="fa fa-steam hidden-xs"></i> SteamOverload.com</h1>
+                    <p class="slogan">
+                        keep track of your Steam library.
+                    </p>
+                </div>
+                <div class="col-md-3" ng-include="'/static/partials/header_buttons.html'">
+                </div>
             </div>
-            <div class="col-md-3">
-                <a href="/auth/steam" class="btn btn-lg btn-info btn-block btn-signin"><i class="fa fa-sign-in"></i> &nbsp;Sign in using Steam</a>
-                <a href="https://github.com/rastating/steamoverload" class="btn btn-lg btn-warning btn-block"><i class="fa fa-github-alt"></i> &nbsp;Report a Problem</a>
+            <div ng-if="$root.slimHeader">
+                <div class="col-md-12">
+                    <a href="/" class="btn btn-inverse btn-lg pull-left"><i class="fa fa-steam"></i> SteamOverload.com</a>
+                    <div class="pull-right" ng-include="'/static/partials/header_buttons.html'">
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row">
@@ -49,6 +56,8 @@
                 <hr>   
             </div>
         </div>
+
+        <div ng-view></div>
     </div>
 
     <div id="footer">

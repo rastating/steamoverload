@@ -1,19 +1,15 @@
 <div class="row">
     <div class="col-md-7">
         <h2 class="lead">Recent Activity</h2>
-        {{#each latest_completions}}
-            <div>
-                <img src="{{user.avatar_small}}" /> <a href="/user/{{steam_id}}">{{user.username}}</a> completed <a href="http://store.steampowered.com/app/{{appid}}/" target="_blank">{{game_info.name}}</a>.
-            </div>
-        {{/each}}
+        <div ng-repeat="completion in latest">
+            <img ng-src="{{completion.user.avatar_small}}" /> <a ng-href="/user/{{completion.steam_id}}">{{completion.user.username}}</a> completed <a ng-href="http://store.steampowered.com/app/{{completion.appid}}/" target="_blank">{{completion.game_info.name}}</a>.
+        </div>
     </div>
     <div class="col-md-5">
         <h2 class="lead">Most Completed Games</h2>
-        {{#each most_completed}}
-            <div>
-                <img src="http://media.steampowered.com/steamcommunity/public/images/apps/{{game_info.appid}}/{{game_info.img_icon_url}}.jpg" /> {{game_info.name}} ({{percentage}}%)
-            </div>
-        {{/each}}
+        <div ng-repeat="completion in most">
+            <img ng-src="http://media.steampowered.com/steamcommunity/public/images/apps/{{completion.game_info.appid}}/{{completion.game_info.img_icon_url}}.jpg" /> {{completion.game_info.name}} ({{completion.percentage}}%)
+        </div>
     </div>
 </div>
 <div class="row">

@@ -1,13 +1,17 @@
 var controllers = angular.module('controllers', []);
 
-controllers.controller('PanelDemoCtrl', function ($scope, $http) {
-    $http.get('/test/panels').success(function (data) {
-        $scope.default = data;
-    });
+controllers.controller('AccountCtrl', function ($rootScope, $scope, $http) {
+    $rootScope.slimHeader = true;
 });
 
-controllers.controller('NavigationCtrl', function ($scope, $http) {
-    $http.get('/api/navigation/').success(function (data) {
-        $scope.links = data.links;
+controllers.controller('HomeCtrl', function ($rootScope, $scope, $http) {
+    $rootScope.slimHeader = false;
+
+    $http.get('/api/summary/latest').success(function (data) {
+        $scope.latest = data;
+    });
+
+    $http.get('/api/summary/top').success(function (data) {
+        $scope.most = data;
     });
 });

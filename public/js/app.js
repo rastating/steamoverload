@@ -5,14 +5,13 @@ var app = angular.module('steamoverload', [
 
 app.config(function ($routeProvider, $locationProvider) {
     $routeProvider.
-        when('/panels', {
-            templateUrl: '/static/partials/panels.html',
-            controller: 'PanelDemoCtrl',
-            requiresAuth: true
+        when('/', {
+            templateUrl: '/static/partials/home.html',
+            controller: 'HomeCtrl'
         }).
-        when('/account/login', {
-            templateUrl: '/static/partials/panels.html',
-            controller: 'PanelDemoCtrl'
+        when('/user/:userid', {
+            templateUrl: '/static/partials/home.html',
+            controller: 'AccountCtrl'
         }).
         otherwise({
             redirectTo: '/'
