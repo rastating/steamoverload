@@ -1,6 +1,12 @@
 <div class="row">
     <div class="col-md-12">
-        <div class="library-thumbnails">
+        <div class="loading-notice animated" ng-class="{ 'gone': library }">
+            <i class="fa fa-spin fa-cog fa-6" style="font-size: 20em;"></i>
+            <p class="lead">
+                I'm loading your library, please wait one moment...
+            </p>
+        </div>
+        <div class="library-thumbnails animated" ng-class="{ 'visible': library, 'gone': !library }">
             <div class="summary">
                 <img src="{{player.avatar_large}}" class="avatar img-rounded img-responsive" />
                 <h2 class="username">{{player.username}}</h2>
@@ -65,25 +71,25 @@
                     <div class="clearfix"></div>
                 </div>
             </div>
-        </div>
 
-        <div ng-if="!library.games" style="text-align: center;">
-            <h2>Your library is empty!</h2>
-            <p>
-                This is usually a sign of your Steam profile being set to private rather than public.
-            </p>
-            <p>
-                To set your profile to be public take the following steps:
-                <ol style="display: inline-block;">
-                    <li>Open up your profile in Steam</li>
-                    <li>Click 'Edit Profile'</li>
-                    <li>Click the 'My Privacy Settings' tab on the right hand side</li>
-                    <li>Choose the 'Public' profile status option and click save</li>
-                </ol>
-            </p>
-        </div>
+            <div ng-if="!library.games" style="text-align: center;">
+                <h2>Your library is empty!</h2>
+                <p>
+                    This is usually a sign of your Steam profile being set to private rather than public.
+                </p>
+                <p>
+                    To set your profile to be public take the following steps:
+                    <ol style="display: inline-block;">
+                        <li>Open up your profile in Steam</li>
+                        <li>Click 'Edit Profile'</li>
+                        <li>Click the 'My Privacy Settings' tab on the right hand side</li>
+                        <li>Choose the 'Public' profile status option and click save</li>
+                    </ol>
+                </p>
+            </div>
 
-        <div style="clear: both;"></div>
+            <div style="clear: both;"></div>
+        </div>
     </div>
 </div>
 
