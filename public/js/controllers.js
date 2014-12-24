@@ -1,7 +1,23 @@
 var controllers = angular.module('controllers', []);
 
-controllers.controller('AccountCtrl', function ($rootScope, $scope, $http) {
+controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams, $http) {
     $rootScope.slimHeader = true;
+
+    $scope.$on('$viewContentLoaded', function () {
+        console.log('$viewContentLoaded');
+    });
+
+    $http.get('/api/profile/' + $routeParams.userid).success(function (data) {
+        $http.get('/api/permissions/edit/' + $routeParams.userid).success(function (permissions) {
+            $scope.user = data.user;
+            $scope.player = data.player;
+            $scope.library = data.library;
+            $scope.list_view = data.list_view;
+            $scope.big_list_view = data.big_list_view;
+            $scope.tile_view = data.tile_view;
+            $scope.read_only = !permissions.hasPermission;
+        });
+    });
 });
 
 controllers.controller('HomeCtrl', function ($rootScope, $scope, $http) {

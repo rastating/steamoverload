@@ -10,7 +10,7 @@ var session         = require('express-session');
 var passport        = require('passport');
 var SteamStrategy   = require('passport-steam').Strategy;
 var MongoClient     = require('mongodb').MongoClient;
-var baseUri         = args.d ? 'http://www.steamoverload.com' : 'http://localhost:3000';
+var baseUri         = args.d ? 'http://localhost:3000' : 'http://www.steamoverload.com';
 var key             = args.k;
 var sessionSecret   = args.s;
 var cookieSecret    = args.c;
@@ -112,6 +112,32 @@ router.get('/api/summary/:category', function (req, res) {
     else if (req.params.category === 'top') {
         module.exports.library.loadMostCompletedGames(callback);
     }
+});
+
+router.get('/api/profile/:steamid', function (req, res) {
+    module.exports.library.load(req.params.steamid, function (error, library) {
+        module.exports.user.load(req.params.steamid, function (error, user) {
+            if (!error) {
+                res.send({
+                    "user": req.user, 
+                    "player": user,
+                    "library": library, 
+                    "list_view": req.cookies.view === "list" || !req.cookies.view,
+                    "big_list_view": req.cookies.view === "big-list",
+                    "tile_view": req.cookies.view === "tile"
+                });
+            }
+        });
+    });
+});
+
+router.get('/api/permissions/edit/:steamid', function (req, res) {
+    var canEdit = false;
+    if (req.isAuthenticated()) {
+        canEdit = req.params.steamid == req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
+    }
+
+    res.send({ "hasPermission": canEdit });
 });
 
 router.get('/*', function (req, res) {

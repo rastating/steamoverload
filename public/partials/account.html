@@ -65,27 +65,37 @@
                     <div class="clearfix"></div>
                 </div>
             </div>
-
-            <div ng-if="!library.games" style="text-align: center;">
-                <h2>Your library is empty!</h2>
-                <p>
-                    This is usually a sign of your Steam profile being set to private rather than public.
-                </p>
-                <p>
-                    To set your profile to be public take the following steps:
-                    <ol style="display: inline-block;">
-                        <li>Open up your profile in Steam</li>
-                        <li>Click 'Edit Profile'</li>
-                        <li>Click the 'My Privacy Settings' tab on the right hand side</li>
-                        <li>Choose the 'Public' profile status option and click save</li>
-                    </ol>
-                </p>
-            </div>
-
-            <div style="clear: both;"></div>
         </div>
+
+        <div ng-if="!library.games" style="text-align: center;">
+            <h2>Your library is empty!</h2>
+            <p>
+                This is usually a sign of your Steam profile being set to private rather than public.
+            </p>
+            <p>
+                To set your profile to be public take the following steps:
+                <ol style="display: inline-block;">
+                    <li>Open up your profile in Steam</li>
+                    <li>Click 'Edit Profile'</li>
+                    <li>Click the 'My Privacy Settings' tab on the right hand side</li>
+                    <li>Choose the 'Public' profile status option and click save</li>
+                </ol>
+            </p>
+        </div>
+
+        <div style="clear: both;"></div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(window).load(function() {
+            alert('loaded');
+        });
+
+        $(':checkbox').checkbox();        
+    });
+</script>
 
 <!--
 <script type="text/javascript">

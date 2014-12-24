@@ -10,7 +10,7 @@ app.config(function ($routeProvider, $locationProvider) {
             controller: 'HomeCtrl'
         }).
         when('/user/:userid', {
-            templateUrl: '/static/partials/home.html',
+            templateUrl: '/static/partials/account.html',
             controller: 'AccountCtrl'
         }).
         otherwise({
