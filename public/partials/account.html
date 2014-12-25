@@ -1,12 +1,12 @@
 <div class="row">
     <div class="col-md-12">
-        <div class="loading-notice animated" ng-class="{ 'gone': library }">
+        <div class="loading-notice" ng-class="{ 'hidden': loaded }">
             <i class="fa fa-spin fa-cog fa-6" style="font-size: 20em;"></i>
             <p class="lead">
                 I'm loading your library, please wait one moment...
             </p>
         </div>
-        <div class="library-thumbnails animated" ng-class="{ 'visible': library, 'gone': !library }">
+        <div class="library-thumbnails animated" ng-class="{ 'visible': loaded, 'gone': !loaded }">
             <div class="summary">
                 <img src="{{player.avatar_large}}" class="avatar img-rounded img-responsive" />
                 <h2 class="username">{{player.username}}</h2>
@@ -24,13 +24,13 @@
                 <div class="pagination">
                     <ul>
                         <li ng-class="{ 'active': list_view }">
-                            <a href="/set/view/list"><i class="fa fa-list"></i></a>
+                            <a target="_self" href="/api/view/list"><i class="fa fa-list"></i></a>
                         </li>
                         <li ng-class="{ 'active': big_list_view }">
-                            <a href="/set/view/big-list"><i class="fa fa-th-list"></i></a>
+                            <a target="_self" href="/api/view/big-list"><i class="fa fa-th-list"></i></a>
                         </li>
                         <li ng-class="{ 'active': tile_view }">
-                            <a href="/set/view/tile"><i class="fa fa-th"></i></a>
+                            <a target="_self" href="/api/view/tile"><i class="fa fa-th"></i></a>
                         </li>
                     </ul>
                 </div>
@@ -95,10 +95,6 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        $(window).load(function() {
-            alert('loaded');
-        });
-
         $(':checkbox').checkbox();        
     });
 </script>

@@ -140,6 +140,11 @@ router.get('/api/permissions/edit/:steamid', function (req, res) {
     res.send({ "hasPermission": canEdit });
 });
 
+router.get('/api/view/:viewid', function (req, res) {
+    res.cookie('view', req.params.viewid);
+    res.redirect('back');
+});
+
 router.get('/*', function (req, res) {
     res.sendfile('index.html', { "root": "./views" });
 });
@@ -215,10 +220,6 @@ app.use('/', router);
             res.redirect("/");
         });
 
-        app.get("/set/view/*", function (req, res) {
-            res.cookie("view", req.url.replace("/set/view/", ""));
-            res.redirect("back");
-        });
     });
 
     // Begin listening on port 3000 for incoming HTTP reuqests.

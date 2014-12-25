@@ -32,7 +32,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="row header" ng-class="{ 'slim': $root.slimHeader }">
+        <div ng-show="$root.slimHeader !== undefined" class="row header" ng-class="{ 'slim': $root.slimHeader }">
             <div ng-if="!$root.slimHeader">
                 <div class="col-md-9">
                     <h1 class="title"><i class="fa fa-steam hidden-xs"></i> SteamOverload.com</h1>

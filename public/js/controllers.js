@@ -16,6 +16,12 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
             $scope.big_list_view = data.big_list_view;
             $scope.tile_view = data.tile_view;
             $scope.read_only = !permissions.hasPermission;
+
+            setTimeout(function () { 
+                $scope.$apply(function () {
+                    $scope.loaded = true;
+                });
+            }, 1000);
         });
     });
 });
