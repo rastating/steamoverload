@@ -116,6 +116,10 @@ router.get('/api/summary/:category', function (req, res) {
 
 router.get('/api/profile/:steamid', function (req, res) {
     module.exports.library.load(req.params.steamid, function (error, library) {
+        if (error) {
+            console.log('INFO   Failed to load library for ' + req.params.steamid + ': ' + error);
+        }
+        
         module.exports.user.load(req.params.steamid, function (error, user) {
             if (!error) {
                 res.send({
@@ -126,6 +130,9 @@ router.get('/api/profile/:steamid', function (req, res) {
                     "big_list_view": req.cookies.view === "big-list",
                     "tile_view": req.cookies.view === "tile"
                 });
+            }
+            else {
+                console.log('INFO   Failed to load user ' + req.params.steamid + ': ' + error);
             }
         });
     });
@@ -145,6 +152,27 @@ router.get('/api/view/:viewid', function (req, res) {
     res.redirect('back');
 });
 
+router.get('/api/session', function (req, res) {
+    var authenticated = req.user !== undefined;
+    var id = 0;
+
+    if (authenticated) {
+        var id = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+    }
+
+    res.send({ 
+        "authenticated": authenticated, 
+        "user": {
+            "id": id
+        }
+    });
+});
+
+router.delete('/api/session', function (req, res) {
+    req.logout();
+    res.send({ "result": 'ok' });
+});
+
 router.get('/*', function (req, res) {
     res.sendfile('index.html', { "root": "./views" });
 });
@@ -153,37 +181,6 @@ app.use('/', router);
 
 
 /*
-
-        app.get("/user/*", function (req, res) {
-            var steam_id = req.url.replace("/user/", "");
-            var read_only = true;
-            var active_user_id = null;
-
-            module.exports.library.load(db, steam_id, function (error, library) {
-                if (req.isAuthenticated()) {
-                    active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-                    if (steam_id === active_user_id) {
-                        read_only = false;
-                    }
-                }
-
-                module.exports.user.load(db, steam_id, function (error, user) {
-                    if (!error) {
-                        res.render("account", { 
-                            steam_id: active_user_id, 
-                            user: req.user, 
-                            player: user,
-                            library: library, 
-                            slim_header: true, 
-                            read_only: read_only,
-                            list_view: req.cookies.view === "list" || !req.cookies.view,
-                            big_list_view: req.cookies.view === "big-list",
-                            tile_view: req.cookies.view === "tile"
-                        });
-                    }
-                });
-            });
-        });
 
         app.post("/api/complete", ensure_authenticated, function (req, res) {
             var app_id = parseInt(req.body.app_id);
@@ -198,33 +195,6 @@ app.use('/', router);
             module.exports.library.uncomplete_game(db, steam_id, app_id);
             res.send("ok");
         });
-
-        app.get("/login", function(req, res){
-            res.render("login", { user: req.user });
-        });
-
-        // Use passport.authenticate() as route middleware to authenticate the request.
-        app.get("/auth/steam", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
-            res.redirect("/");
-        });
-
-        // Use passport.authenticate() as route middleware to authenticate the request.
-        // If authentication fails, the user will be redirected back to the login page.
-        // Otherwise, the primary route function function will be called.
-        app.get("/auth/steam/return", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
-            res.redirect("/");
-        });
-
-        app.get("/logout", function (req, res) {
-            req.logout();
-            res.redirect("/");
-        });
-
-    });
-
-    // Begin listening on port 3000 for incoming HTTP reuqests.
-    app.listen(3000);
-};
 
 */
 

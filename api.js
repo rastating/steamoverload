@@ -34,7 +34,7 @@ var call = function (url, args, callback) {
             }
         }
         else {
-            callback(true, null);
+            callback(error, null);
         }
     });
 };

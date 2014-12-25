@@ -69,12 +69,12 @@ var cacheLibrary = function (steamID, callback) {
                     loadLibrary(steamID, callback);
                 }
                 else {
-                    callback("Failed to update cache for id " + steamID, null);
+                    callback('Failed to update cache for id ' + steamID + ': ' + error, null);
                 }
             });
         }
         else {
-            callback("Failed to fetch library for id " + steamID, null);
+            callback('Failed to fetch library for id ' + steamID + ': ' + error, null);
         }
     });
 };
@@ -96,7 +96,7 @@ var loadCompletedGames = function (steamID, callback) {
 
 var loadLibrary = function (steamID, callback) {
     var db = module.exports.db;
-    var collection = db.collection("libraries");
+    var collection = db.collection('libraries');
     var criteria = { "steam_id": steamID };
 
     collection.findOne(criteria, function (error, doc) {
@@ -117,6 +117,9 @@ var loadLibrary = function (steamID, callback) {
                             }
                         }
                     }
+                }
+                else {
+                    callback(error, null);
                 }
 
                 // Calculate and assign completion figures.
@@ -176,6 +179,7 @@ var loadLatestCompletions = function (callback) {
                     });
 
                     user.load(completedGame.steam_id, function (error, completer) {
+                        console.log('user.load callback | error state: ' + error + ' | completer: completer ');
                         completedGame.user = completer;
                         loaded += 1;
 

@@ -223,6 +223,12 @@ label.checkbox {
     background-color: #f7f7f7;
 }
 
+.animated.gone {
+    opacity: 0;
+    visibility: hidden;
+    display: block;
+}
+
 .animated.visible {
     -moz-transition: opacity 1s linear;
     -o-transition: opacity 1s linear;

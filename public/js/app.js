@@ -3,6 +3,17 @@ var app = angular.module('steamoverload', [
     'controllers'
 ]);
 
+app.factory('$session', function ($http) {
+    return {
+        fetch: function () {
+            return $http.get('/api/session/');
+        },
+        destroy: function () {
+            return $http.delete('/api/session');
+        }
+    };
+});
+
 app.config(function ($routeProvider, $locationProvider) {
     $routeProvider.
         when('/', {
@@ -20,8 +31,19 @@ app.config(function ($routeProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
 });
 
-app.run(function ($rootScope, $location) {
+app.run(function ($rootScope, $location, $session) {
+    $rootScope.logout = function () {
+        console.log('$rootScope.logout');
+        $session.destroy().then(function () {
+            $rootScope.session = { "authenticated": false, "user": {} };
+        });
+    };
+
     $rootScope.$on("$routeChangeStart", function (event, next, current) {
+        $session.fetch().then(function (session) {
+            $rootScope.session = session.data;
+        });
+
         if (next.requiresAuth && !$rootScope.user) {
             $location.path('/account/login');
         }

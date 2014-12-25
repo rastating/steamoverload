@@ -1,4 +1,10 @@
 
+// BASE SETUP
+// ==============================================
+
+var args            = require('minimist')(process.argv.slice(2));
+var debugging       = args.d;
+
 // MODULE FUNCTIONS
 // ==============================================
 
@@ -22,12 +28,12 @@ var cacheData = function (steamID, callback) {
                     loadUserData(steamID, callback);
                 }
                 else {
-                    callback("Failed to update cache for user " + steamID, null);
+                    callback('Failed to update cache for user ' + steamID, null);
                 }
             });
         }
         else {
-            callback("Failed to fetch user information for user " + steamID, null);
+            callback('Failed to fetch user information for user ' + steamID + ': ' + error, null);
         }
     });
 };
