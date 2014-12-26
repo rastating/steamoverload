@@ -92,7 +92,7 @@
 
  /* CHECKBOX DATA-API
   * =============== */
-
+/*
 	$(document).on('click.checkbox.data-api', '[data-toggle^=checkbox], .checkbox', function (e) {
 	  var $checkbox = $(e.target);
 		if (e.target.tagName != "A") {			
@@ -101,7 +101,7 @@
 			$checkbox.find(':checkbox').checkbox('toggle');
 		}
 	});
-	
+	*/
 	$(function () {
 		$('[data-toggle="checkbox"]').each(function () {
 			var $checkbox = $(this);

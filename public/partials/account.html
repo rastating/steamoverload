@@ -38,8 +38,8 @@
 
             <div class="clearfix"></div>
 
-            <div ng-repeat="game in library.games" class="game-thumbnail" ng-class="{ 'block': !tile_view, 'pull-left': tile_view }">
-                <div ng-class="{ 'game-list-item': !tile_view, 'game-tile': tile_view, 'big-list': big_list_view }">
+            <div ng-repeat="game in library.games" class="game-thumbnail" ng-class="{ 'block': !tile_view, 'pull-left': tile_view, 'tile-thumbnail': tile_view, 'readonly': read_only }">
+                <div ng-class="{ 'game-list-item': !tile_view, 'game-tile': tile_view, 'big-list': big_list_view }" ng-click="completeGame($event, game)">
                     <!-- Tile View -->
                     <img ng-if="tile_view" class="game-thumbnail" ng-src="http://media.steampowered.com/steamcommunity/public/images/apps/{{game.appid}}/{{game.img_logo_url}}.jpg" />
                     <div ng-if="tile_view" class="thumbnail-overlay" ng-class="{ 'completed': game.completed }">
@@ -95,7 +95,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        $(':checkbox').checkbox();        
+        $(':checkbox').checkbox();
     });
 </script>
 
@@ -105,19 +105,6 @@
         $(':checkbox').checkbox();
 
         {{#unless read_only}}
-
-            {{#if tile_view}}
-                $('.game-thumbnail').hover(function() {
-                    if (!$(this).find('.thumbnail-overlay').hasClass('completed')) {
-                        $(this).find('.thumbnail-overlay').stop().fadeIn(200);
-                    }
-                },
-                function () {
-                    if (!$(this).find('.thumbnail-overlay').hasClass('completed')) {
-                        $(this).find('.thumbnail-overlay').stop().fadeOut(200);
-                    }
-                });
-            {{/if}}
 
             $('.thumbnail-overlay, .game-list-item').click(function (e) {
                 e.stopPropagation();

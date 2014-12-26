@@ -24,6 +24,12 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
             }, 1000);
         });
     });
+
+    $scope.completeGame = function ($event, game) {
+        if ($event.originalEvent.target.tagName !== 'INPUT') {
+            game.completed = !game.completed;
+        }
+    }
 });
 
 controllers.controller('HomeCtrl', function ($rootScope, $scope, $http) {
