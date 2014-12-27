@@ -4,7 +4,7 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
     $rootScope.slimHeader = true;
 
     var setView = function (view) {
-        $scope.list_view        = view === 'list';
+        $scope.list_view        = view === 'list' || !view;
         $scope.big_list_view    = view === 'big-list';
         $scope.tile_view        = view === 'tile';
     }

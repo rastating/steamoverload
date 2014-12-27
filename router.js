@@ -145,7 +145,7 @@ router.get('/api/permissions/edit/:steamid', function (req, res) {
 });
 
 router.put('/api/session/view/:viewid', function (req, res) {
-    res.cookie('view', req.params.viewid);
+    res.cookie('view', req.params.viewid,  { "maxAge": 2147483647 });
     req.session.view = req.params.viewid;
     res.send({ "result": 'ok' });
 });
