@@ -1,0 +1,4 @@
+<a ng-if="$root.session.authenticated" href="/user/{{$root.session.user.id}}" class="btn btn-lg btn-info" ng-class="{ 'btn-signin': !$root.slimHeader, 'btn-block': !$root.slimHeader }"><i class="fa fa-hdd-o"></i> &nbsp;My Library</a>
+<a ng-if="$root.session.authenticated" ng-click="$root.logout()" class="btn btn-lg btn-danger" ng-class="{ 'btn-block': !$root.slimHeader }"><i class="fa fa-sign-out"></i> &nbsp;Sign Out</a>
+<a ng-if="!$root.session.authenticated" href="/auth/steam" target="_self" class="btn btn-lg btn-info" ng-class="{ 'btn-signin': !$root.slimHeader, 'btn-block': !$root.slimHeader }"><i class="fa fa-sign-in"></i> &nbsp;Sign in using Steam</a>
+<a ng-if="!$root.session.authenticated" href="https://github.com/rastating/steamoverload" class="btn btn-lg btn-warning" ng-class="{ 'btn-block': !$root.slimHeader }"><i class="fa fa-github-alt"></i> &nbsp;Report a Problem</a>

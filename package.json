@@ -1,19 +1,19 @@
 {
-    "name": "steamsaleoverload",
+    "name": "steamoverload",
     "description": "A Node.js web app for tracking the progress of your Steam library",
-    "version": "0.0.1",
+    "version": "1.0.2",
     "private": true,
     "dependencies": {
         "express": "4.x",
         "mongodb": "1.x",
         "request": "2.x",
-        "hbs": "2.x",
         "passport": "0.2.x",
         "passport-openid": "0.3.x",
         "passport-steam": "0.1.x",
         "sugar": "1.x",
-        "body-parser": "1.2.x",
-        "cookie-parser": "1.1.x",
-        "express-session": "1.2.x"
+        "body-parser": "1.x",
+        "cookie-parser": "1.x",
+        "express-session": "1.x",
+        "minimist": "1.x"
     }
 }

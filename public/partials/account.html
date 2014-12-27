@@ -1,0 +1,144 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="loading-notice" ng-class="{ 'hidden': loaded }">
+            <i class="fa fa-spin fa-cog fa-6" style="font-size: 20em;"></i>
+            <p class="lead">
+                I'm loading your library, please wait one moment...
+            </p>
+        </div>
+        <div class="library-thumbnails animated" ng-class="{ 'visible': loaded, 'gone': !loaded }">
+            <div class="summary">
+                <img src="{{player.avatar_large}}" class="avatar img-rounded img-responsive" />
+                <h2 class="username">{{player.username}}</h2>
+                <p class="lead">
+                    Completed {{library.completed_count}}/{{library.game_count}} games ({{library.completion_percent}}%)
+                </p>
+                <div class="progress">
+                    <div class="progress-bar" style="width: {{library.completion_percent}}%;"></div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+
+            <div class="pull-right">
+                <div class="pagination">
+                    <ul>
+                        <li ng-class="{ 'active': list_view }">
+                            <a ng-click="changeView('list')"><i class="fa fa-list"></i></a>
+                        </li>
+                        <li ng-class="{ 'active': big_list_view }">
+                            <a ng-click="changeView('big-list')"><i class="fa fa-th-list"></i></a>
+                        </li>
+                        <li ng-class="{ 'active': tile_view }">
+                            <a ng-click="changeView('tile')"><i class="fa fa-th"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <div ng-repeat="game in library.games" class="game-thumbnail" ng-class="{ 'block': !tile_view, 'pull-left': tile_view, 'tile-thumbnail': tile_view, 'readonly': read_only }">
+                <div ng-class="{ 'game-list-item': !tile_view, 'game-tile': tile_view, 'big-list': big_list_view }" ng-click="completeGame($event, game)">
+                    <!-- Tile View -->
+                    <img ng-if="tile_view" class="game-thumbnail" ng-src="http://media.steampowered.com/steamcommunity/public/images/apps/{{game.appid}}/{{game.img_logo_url}}.jpg" />
+                    <div ng-if="tile_view" class="thumbnail-overlay" ng-class="{ 'completed': game.completed }">
+                        <label class="checkbox" ng-class="{ 'checked': game.completed, 'disabled': read_only }">
+                            <input type="checkbox" value="" ng-checked="game.completed" name="{{game.appid}}" id="{{game.appid}}" data-toggle="checkbox" ng-disabled="read_only">
+                            Completed
+                        </label>
+                    </div>
+                    <!-- /Tile View-->
+
+                    <!-- List & "Big List" View -->
+                    <span ng-if="!tile_view" class="pull-left">
+                        <span class="icon">
+                            <img ng-if="list_view" ng-src="http://media.steampowered.com/steamcommunity/public/images/apps/{{game.appid}}/{{game.img_icon_url}}.jpg" />
+                            <img ng-if="big_list_view" ng-src="http://media.steampowered.com/steamcommunity/public/images/apps/{{game.appid}}/{{game.img_logo_url}}.jpg" />
+                        </span>
+                        <span class="name">
+                            {{game.name}}
+                        </span>
+                    </span>
+                    <span ng-if="!tile_view" class="pull-right">
+                        <label class="checkbox" ng-class="{ 'checked': game.completed, 'disabled': read_only }">
+                            <input type="checkbox" value="" ng-checked="game.completed" name="{{game.appid}}" id="{{game.appid}}" data-toggle="checkbox" ng-disabled="read_only">
+                            Completed
+                        </label>
+                    </span>
+                    <!-- /List & "Big List" View -->
+
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+            <div ng-if="!library.games" style="text-align: center;">
+                <h2>Your library is empty!</h2>
+                <p>
+                    This is usually a sign of your Steam profile being set to private rather than public.
+                </p>
+                <p>
+                    To set your profile to be public take the following steps:
+                    <ol style="display: inline-block;">
+                        <li>Open up your profile in Steam</li>
+                        <li>Click 'Edit Profile'</li>
+                        <li>Click the 'My Privacy Settings' tab on the right hand side</li>
+                        <li>Choose the 'Public' profile status option and click save</li>
+                    </ol>
+                </p>
+            </div>
+
+            <div style="clear: both;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(':checkbox').checkbox();
+    });
+</script>
+
+<!--
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(':checkbox').checkbox();
+
+        {{#unless read_only}}
+
+            $('.thumbnail-overlay, .game-list-item').click(function (e) {
+                e.stopPropagation();
+                $(this).find(':checkbox').checkbox('toggle');
+            });
+
+            $(':checkbox').on('toggle', function() {
+                var app_id = $(this).attr('id');
+                var set_as_completed = $(this).attr('checked');
+                var post_data = { "app_id": app_id };
+
+                {{#if tile_view}}
+                    $(this).parent().parent().toggleClass('completed');
+                {{/if}}
+
+                if (set_as_completed) {
+                    $.ajax({
+                        url: '/api/complete',
+                        type: "POST",
+                        contentType:"application/json; charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(post_data)
+                    });
+                }
+                else {
+                    $.post('/api/uncomplete', { "app_id": app_id });
+                }
+            });
+
+            $(':checkbox').click(function (e) {
+                e.stopPropagation();
+                return false; 
+            });
+        {{/unless}}
+    });
+</script>
+-->

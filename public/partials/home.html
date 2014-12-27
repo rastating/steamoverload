@@ -1,0 +1,43 @@
+<div class="row">
+    <div class="col-md-7">
+        <h2 class="lead">Recent Activity</h2>
+        <div ng-repeat="completion in latest">
+            <img ng-src="{{completion.user.avatar_small}}" /> <a ng-href="/user/{{completion.steam_id}}">{{completion.user.username}}</a> completed <a ng-href="http://store.steampowered.com/app/{{completion.appid}}/" target="_blank">{{completion.game_info.name}}</a>.
+        </div>
+    </div>
+    <div class="col-md-5">
+        <h2 class="lead">Most Completed Games</h2>
+        <div ng-repeat="completion in most">
+            <img ng-src="http://media.steampowered.com/steamcommunity/public/images/apps/{{completion.game_info.appid}}/{{completion.game_info.img_icon_url}}.jpg" /> {{completion.game_info.name}} ({{completion.percentage}}%)
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <hr style="margin-top: 40px;">   
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="lead">What is Steam Overload?</h2>
+        <p>
+            Steam Overload is a utility to allow you to keep track of which games you have completed in your Steam library; particularly after the mayhem that is the Steam sales. In essence, it is a glorified check list, but one that can help save you some time when keeping track of your game list.
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="lead">Do you store any of my personal information?</h2>
+        <p>
+            <strong>No</strong>, when you use the "Sign in with Steam" button, you are authenticating yourself with <strong>Steam</strong> and then Steam simply informs the website of the user who signed in. No personal information is stored at all, other than information on which games you have marked as completed, of course.
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="lead">I have found a bug / want to make a suggestion - what should I do?</h2>
+        <p>
+            If you have found a bug or want to make a suggestion on how Steam Overload can be improved, the preferred point of contact would be via <a href="https://github.com/rastating/steamoverload">The GitHub Page</a>. If you don't have an account on GitHub, you can also contact me personally via <a href="https://twitter.com/iamrastating">Twitter</a> or <a href="https://plus.google.com/u/0/101711965674283402975/posts">Google+</a>.
+        </p>
+    </div>
+</div>

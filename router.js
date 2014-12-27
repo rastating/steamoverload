@@ -1,15 +1,44 @@
-"use strict";
 
-var express = require("express");
-var cookieParser = require("cookie-parser");
-var bodyParser = require("body-parser");
-var session = require("express-session");
-var passport = require("passport");
-var SteamStrategy = require("passport-steam").Strategy;
-var base_uri = process.argv.indexOf("debug") === -1 ? "http://www.steamoverload.com" : "http://localhost:3000";
-var MongoClient = require("mongodb").MongoClient;
+// BASE SETUP
+// ==============================================
 
-// Setup PassportJS strategy.
+var args            = require('minimist')(process.argv.slice(2));
+var express         = require('express');
+var cookieParser    = require('cookie-parser');
+var bodyParser      = require('body-parser');
+var session         = require('express-session');
+var passport        = require('passport');
+var SteamStrategy   = require('passport-steam').Strategy;
+var MongoClient     = require('mongodb').MongoClient;
+var baseUri         = args.d ? 'http://localhost:3000' : 'http://www.steamoverload.com';
+var key             = args.k;
+var sessionSecret   = args.s;
+var cookieSecret    = args.c;
+var app             = express();
+var router          = express.Router();
+var debugging       = args.d;
+
+app.use(bodyParser.urlencoded({ "extended": false }));
+app.use(bodyParser.json());
+app.use(cookieParser(cookieSecret));
+app.use(session({ "secret": sessionSecret, "saveUninitialized": true, "resave": true }));
+
+
+// AUTHENTICATION MIDDLEWARE
+// ==============================================
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+var isAuthenticated = function (req, res, next) {
+    if (req.isAuthenticated()) {
+        return next(); 
+    }
+    else {
+        res.status(401).send({ "error": true, "message": 'Authentication required' });
+    }
+};
+
 passport.serializeUser(function (user, done) {
     done(null, user);
 });
@@ -19,9 +48,9 @@ passport.deserializeUser(function (obj, done) {
 });
 
 passport.use(new SteamStrategy({
-        returnURL: base_uri + "/auth/steam/return",
-        realm: base_uri,
-        apiKey: process.argv[2]
+        "returnURL": baseUri + '/auth/steam/return',
+        "realm": baseUri,
+        "apiKey": key
     },
     function (identifier, profile, done) {
         profile.identifier = identifier;
@@ -29,149 +58,156 @@ passport.use(new SteamStrategy({
     }
 ));
 
-// Initialise Express and its middleware.
-var app = express();
-app.set("view engine", "html");
-app.engine("html", require("hbs").__express);
-app.use("/static", express.static("static"));
-app.use(cookieParser());
-app.use(bodyParser());
-app.use(session({ secret: "keyboard cat" }));
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Initialise Handlebars
-var hbs = require("hbs");
-hbs.registerPartials("views/partials");
-
-// Route middleware to ensure the user has authenticated via Steam.
-var ensure_authenticated = function (req, res, next) {
-    if (req.isAuthenticated()) {
-        return next(); 
-    }
-  
+app.get("/auth/steam", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
     res.redirect("/");
-};
+});
 
-var start = function () {
-    // Open the connection to the database and setup the Express routes.
-    MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(err, db) {
+app.get("/auth/steam/return", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
+    res.redirect("/");
+});
 
-        // Force the user on to the www subdomain.
-        app.get("/*", function (req, res, next) {
-            if (req.headers.host.match(/^www/) === null ) {
-                if (process.argv.indexOf("debug") === -1) {
-                    res.redirect(301, "http://www." + req.headers.host + req.url);
-                }
-                else {
-                    return next();
-                }
+
+// STATIC FILE SERVER
+// ==============================================
+
+app.use('/static', express.static('public'));
+
+
+// ROUTES
+// ==============================================
+
+router.use(function (req, res, next) {
+    console.log(req.method, req.url);
+    next();
+});
+
+
+router.get('/*', function (req, res, next) {
+    if (req.headers.host.match(/^www/) === null ) {
+        if (!debugging) {
+            res.redirect(301, 'http://www.' + req.headers.host + req.url);
+        }
+        else {
+            return next();
+        }
+    }
+    else {
+        return next();
+    }
+});
+
+router.get('/api/summary/:category', function (req, res) {
+    var callback = function (error, games) {
+        if (error) {
+            res.status(403).send({ "error": true, "message": error });
+        }
+        else {
+            res.send(games);
+        }
+    };
+
+    if (req.params.category === 'latest') {
+        module.exports.library.loadLatestCompletions(callback);
+    }
+    else if (req.params.category === 'top') {
+        module.exports.library.loadMostCompletedGames(callback);
+    }
+});
+
+router.get('/api/profile/:steamid', function (req, res) {
+    module.exports.library.load(req.params.steamid, function (error, library) {
+        if (error) {
+            console.log('INFO   Failed to load library for ' + req.params.steamid + ': ' + error);
+        }
+        
+        module.exports.user.load(req.params.steamid, function (error, user) {
+            if (!error) {
+                res.send({
+                    "user": req.user, 
+                    "player": user,
+                    "library": library
+                });
             }
             else {
-                return next();
+                console.log('INFO   Failed to load user ' + req.params.steamid + ': ' + error);
             }
-        });
-
-        app.get("/", function (req, res) {
-            var active_user_id = null;
-            if (req.isAuthenticated()) {
-                active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-            }
-
-            module.exports.library.load_latest_completions(db, function (error, latest_completions) {
-                var users_loaded = 0;
-                module.exports.library.load_most_completed_games(db, function (error, most_completed) {
-
-                    latest_completions.forEach(function (game) {
-                        module.exports.user.load(db, game.steam_id, function (error, user) {
-                            game.user = user;
-                            users_loaded += 1;
-
-                            if (users_loaded === latest_completions.length) {
-                                res.render("index", { steam_id: active_user_id, latest_completions: latest_completions, most_completed: most_completed, user: req.user });
-                            }
-                        });
-                    });
-                });
-            });
-        });
-
-        app.get("/user/*", function (req, res) {
-            var steam_id = req.url.replace("/user/", "");
-            var read_only = true;
-            var active_user_id = null;
-
-            module.exports.library.load(db, steam_id, function (error, library) {
-                if (req.isAuthenticated()) {
-                    active_user_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-                    if (steam_id === active_user_id) {
-                        read_only = false;
-                    }
-                }
-
-                module.exports.user.load(db, steam_id, function (error, user) {
-                    if (!error) {
-                        res.render("account", { 
-                            steam_id: active_user_id, 
-                            user: req.user, 
-                            player: user,
-                            library: library, 
-                            slim_header: true, 
-                            read_only: read_only,
-                            list_view: req.cookies.view === "list" || !req.cookies.view,
-                            big_list_view: req.cookies.view === "big-list",
-                            tile_view: req.cookies.view === "tile"
-                        });
-                    }
-                });
-            });
-        });
-
-        app.post("/api/complete", ensure_authenticated, function (req, res) {
-            var app_id = parseInt(req.body.app_id);
-            var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-            module.exports.library.complete_game(db, steam_id, app_id);
-            res.send("ok");
-        });
-
-        app.post("/api/uncomplete", ensure_authenticated, function (req, res) {
-            var app_id = parseInt(req.body.app_id);
-            var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-            module.exports.library.uncomplete_game(db, steam_id, app_id);
-            res.send("ok");
-        });
-
-        app.get("/login", function(req, res){
-            res.render("login", { user: req.user });
-        });
-
-        // Use passport.authenticate() as route middleware to authenticate the request.
-        app.get("/auth/steam", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
-            res.redirect("/");
-        });
-
-        // Use passport.authenticate() as route middleware to authenticate the request.
-        // If authentication fails, the user will be redirected back to the login page.
-        // Otherwise, the primary route function function will be called.
-        app.get("/auth/steam/return", passport.authenticate("steam", { failureRedirect: "/login" }), function (req, res) {
-            res.redirect("/");
-        });
-
-        app.get("/logout", function (req, res) {
-            req.logout();
-            res.redirect("/");
-        });
-
-        app.get("/set/view/*", function (req, res) {
-            res.cookie("view", req.url.replace("/set/view/", ""));
-            res.redirect("back");
         });
     });
+});
 
-    // Begin listening on port 3000 for incoming HTTP reuqests.
-    app.listen(3000);
+router.post('/api/profile/games/:appid', isAuthenticated, function (req, res) {
+    var steamID = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+    module.exports.library.completeGame(steamID, parseInt(req.params.appid));
+    res.send({ "result": 'ok' });
+});
+
+router.delete('/api/profile/games/:appid', isAuthenticated, function (req, res) {
+    var steamID = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+    module.exports.library.uncompleteGame(steamID, parseInt(req.params.appid));
+    res.send({ "result": 'ok' });
+});
+
+router.get('/api/permissions/edit/:steamid', function (req, res) {
+    var canEdit = false;
+    if (req.isAuthenticated()) {
+        canEdit = req.params.steamid == req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
+    }
+
+    res.send({ "hasPermission": canEdit });
+});
+
+router.put('/api/session/view/:viewid', function (req, res) {
+    res.cookie('view', req.params.viewid,  { "maxAge": 2147483647 });
+    req.session.view = req.params.viewid;
+    res.send({ "result": 'ok' });
+});
+
+router.get('/api/session', function (req, res) {
+    var authenticated = req.user !== undefined;
+    var id = 0;
+
+    if (authenticated) {
+        var id = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+    }
+
+    res.send({ 
+        "authenticated": authenticated, 
+        "view": req.cookies.view || req.session.view,
+        "user": {
+            "id": id
+        }
+    });
+});
+
+router.delete('/api/session', function (req, res) {
+    req.logout();
+    res.send({ "result": 'ok' });
+});
+
+router.get('/*', function (req, res) {
+    res.sendfile('index.html', { "root": "./views" });
+});
+
+app.use('/', router);
+
+
+// MODULE FUNCTIONS
+// ==============================================
+
+var listen = function () {
+    MongoClient.connect("mongodb://127.0.0.1:27017/steamoverload", function(error, db) {
+        if (error) {
+            console.log('ERROR: Could not establish a connection to mongodb.');
+        }
+        else {
+            console.log('INFO:  Established connection to mongodb.');
+            module.exports.library.db = db;
+            module.exports.user.db = db;
+            app.listen(3000);
+        }
+    });
 };
 
 module.exports.library = null;
-module.exports.start = start;
+module.exports.listen = listen;
 module.exports.user = null;

@@ -1,26 +1,31 @@
-"use strict";
 
-var api = require("./api");
-var library = require("./library");
-var user = require("./user");
-var router = require("./router");
+// BASE SETUP
+// ==============================================
 
-// Setup Sugar.js extension functions.
-require("sugar");
+var args    = require('minimist')(process.argv.slice(2));
+var api     = require('./api');
+var library = require('./library');
+var user    = require('./user');
+var router  = require('./router');
+var sugar   = require('sugar');
+var key     = args.k;
 
-// Initialise the Steam API module.
-api.initialise(process.argv[2]);
-console.log("[i] Initialised API");
+
+// LOAD APPLICAITON MODULES
+// ==============================================
+
+api.initialise(key);
+console.log('[i] Initialised API');
 
 library.api = api;
-console.log("[i] Initialised Library module");
+console.log('[i] Initialised Library module');
 
 user.api = api;
-console.log("[i] Initialised User module");
+console.log('[i] Initialised User module');
 
 router.library = library;
 router.user = user;
-console.log("[i] Initialised Router module");
+console.log('[i] Initialised Router module');
 
-router.start();
-console.log("[i] Started router on port 3000");
+router.listen();
+console.log('[i] Started router on port 3000');
