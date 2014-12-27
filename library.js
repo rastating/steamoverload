@@ -66,15 +66,30 @@ var cacheLibrary = function (steamID, callback) {
             // Update the library and call back into the loadLibrary function if successful.
             collection.update(criteria, { $set: library }, { upsert: true }, function (error) {
                 if (!error) {
-                    loadLibrary(steamID, callback);
+                    if (callback) {
+                        loadLibrary(steamID, callback);
+                    }
+                    else {
+                        console.log('INFO   Finished caching library for ' + steamID);
+                    }
                 }
                 else {
-                    callback('Failed to update cache for id ' + steamID + ': ' + error, null);
+                    if (callback) {
+                        callback('Failed to update cache for id ' + steamID + ': ' + error, null);
+                    }
+                    else {
+                        console.log('Failed to update cache for id ' + steamID + ': ' + error);
+                    }
                 }
             });
         }
         else {
-            callback('Failed to fetch library for id ' + steamID + ': ' + error, null);
+            if (callback) {
+                callback('Failed to fetch library for id ' + steamID + ': ' + error, null);
+            }
+            else {
+                console.log('Failed to fetch library for id ' + steamID + ': ' + error);
+            }
         }
     });
 };
@@ -100,10 +115,15 @@ var loadLibrary = function (steamID, callback) {
     var criteria = { "steam_id": steamID };
 
     collection.findOne(criteria, function (error, doc) {
-        if (!doc || doc.cached_at < Date.now() - module.exports.cacheTimeout) {
+        if (!doc) {
             cacheLibrary(steamID, callback);
         }
         else {
+            if (doc.cached_at < Date.now() - module.exports.cacheTimeout) {
+                console.log('INFO   Starting async library update for ' + steamID);
+                setTimeout(function () { cacheLibrary(steamID); }, 1000);
+            }
+            
             loadCompletedGames(steamID, function (error, completed) {
                 if (!error && completed && completed.length > 0) {
                     var games = doc.games;
@@ -179,7 +199,6 @@ var loadLatestCompletions = function (callback) {
                     });
 
                     user.load(completedGame.steam_id, function (error, completer) {
-                        console.log('user.load callback | error state: ' + error + ' | completer: completer ');
                         completedGame.user = completer;
                         loaded += 1;
 

@@ -9,6 +9,12 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
         $scope.tile_view        = view === 'tile';
     }
 
+    $rootScope.$watch('session', function (newValue, oldValue) {
+        if (!newValue.authenticated) {
+            $scope.read_only = true;
+        }
+    }, true);
+
     $http.get('/api/profile/' + $routeParams.userid).success(function (data) {
         $http.get('/api/permissions/edit/' + $routeParams.userid).success(function (permissions) {
             $scope.user         = data.user;
@@ -28,7 +34,9 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
 
     $scope.completeGame = function ($event, game) {
         if ($event.originalEvent.target.tagName !== 'INPUT') {
-            game.completed = !game.completed;
+            if (!$scope.read_only) {
+                game.completed = !game.completed;
+            }
         }
     }
 

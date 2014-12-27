@@ -23,17 +23,32 @@ var cacheData = function (steamID, callback) {
             user.steam_id = steamID;
             user.cached_at = Date.now();
 
-            collection.update({ "steam_id": steamID }, { $set: user }, { "upsert": true }, function (error) {
+            collection.update({ "steamid": steamID }, { $set: user }, { "upsert": true }, function (error) {
                 if (!error) {
-                    loadUserData(steamID, callback);
+                    if (callback) {
+                        loadUserData(steamID, callback);
+                    }
+                    else {
+                        console.log('INFO   Finished caching user data for ' + steamID);
+                    }
                 }
                 else {
-                    callback('Failed to update cache for user ' + steamID, null);
+                    if (callback) {
+                        callback('Failed to update cache for user ' + steamID, null);
+                    }
+                    else {
+                        console.log('Failed to update cache for user ' + steamID);
+                    }
                 }
             });
         }
         else {
-            callback('Failed to fetch user information for user ' + steamID + ': ' + error, null);
+            if (callback) {
+                callback('Failed to fetch user information for user ' + steamID + ': ' + error, null);
+            }
+            else {
+                console.log('Failed to fetch user information for user ' + steamID + ': ' + error);
+            }
         }
     });
 };
@@ -41,13 +56,18 @@ var cacheData = function (steamID, callback) {
 var loadUserData = function (steamID, callback) {
     var db = module.exports.db;
     var collection = db.collection("users");
-    var criteria = { "steam_id": steamID };
+    var criteria = { "steamid": steamID };
 
     collection.findOne(criteria, function (error, doc) {
-        if (!doc || doc.cached_at < Date.now() - 300000) {
+        if (!doc) {
             cacheData(steamID, callback);
         }
         else {
+            if (doc.cached_at < Date.now() - 300000) {
+                console.log('INFO   Starting async user update for ' + steamID);
+                setTimeout(function () { cacheData(steamID); }, 1000);
+            }
+
             var user = {
                 "id": steamID,
                 "username": doc.personaname,
