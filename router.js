@@ -135,6 +135,18 @@ router.get('/api/profile/:steamid', function (req, res) {
     });
 });
 
+router.post('/api/profile/games/:appid', isAuthenticated, function (req, res) {
+    var steamID = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+    module.exports.library.completeGame(steamID, parseInt(req.params.appid));
+    res.send({ "result": 'ok' });
+});
+
+router.delete('/api/profile/games/:appid', isAuthenticated, function (req, res) {
+    var steamID = req.user.identifier.replace('http://steamcommunity.com/openid/id/', '');
+    module.exports.library.uncompleteGame(steamID, parseInt(req.params.appid));
+    res.send({ "result": 'ok' });
+});
+
 router.get('/api/permissions/edit/:steamid', function (req, res) {
     var canEdit = false;
     if (req.isAuthenticated()) {
@@ -178,24 +190,6 @@ router.get('/*', function (req, res) {
 
 app.use('/', router);
 
-
-/*
-
-        app.post("/api/complete", ensure_authenticated, function (req, res) {
-            var app_id = parseInt(req.body.app_id);
-            var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-            module.exports.library.complete_game(db, steam_id, app_id);
-            res.send("ok");
-        });
-
-        app.post("/api/uncomplete", ensure_authenticated, function (req, res) {
-            var app_id = parseInt(req.body.app_id);
-            var steam_id = req.user.identifier.replace("http://steamcommunity.com/openid/id/", "");
-            module.exports.library.uncomplete_game(db, steam_id, app_id);
-            res.send("ok");
-        });
-
-*/
 
 // MODULE FUNCTIONS
 // ==============================================

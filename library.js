@@ -123,7 +123,7 @@ var loadLibrary = function (steamID, callback) {
                 console.log('INFO   Starting async library update for ' + steamID);
                 setTimeout(function () { cacheLibrary(steamID); }, 1000);
             }
-            
+
             loadCompletedGames(steamID, function (error, completed) {
                 if (!error && completed && completed.length > 0) {
                     var games = doc.games;
@@ -258,7 +258,7 @@ var loadMostCompletedGames = function (callback) {
 
 var completeGame = function (steamID, gameID) {
     var db = module.exports.db;
-    var collection = db.collection("completed_games");
+    var collection = db.collection('completed_games');
     var object = { "steam_id": steamID, "appid": gameID, "completed_at": Date.now() };
     collection.update(object, { $set: object }, { upsert: true }, function (error) {
         if (error) {

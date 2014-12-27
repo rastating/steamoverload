@@ -43,9 +43,5 @@ app.run(function ($rootScope, $location, $session) {
         $session.fetch().then(function (session) {
             $rootScope.session = session.data;
         });
-
-        if (next.requiresAuth && !$rootScope.user) {
-            $location.path('/account/login');
-        }
     });
 });

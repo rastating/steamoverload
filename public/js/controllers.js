@@ -36,6 +36,12 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
         if ($event.originalEvent.target.tagName !== 'INPUT') {
             if (!$scope.read_only) {
                 game.completed = !game.completed;
+                if (game.completed) {
+                    $http.post('/api/profile/games/' + game.appid);
+                }
+                else {
+                    $http.delete('/api/profile/games/' + game.appid);
+                }
             }
         }
     }
