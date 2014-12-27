@@ -3,19 +3,20 @@ var controllers = angular.module('controllers', []);
 controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams, $http) {
     $rootScope.slimHeader = true;
 
-    $scope.$on('$viewContentLoaded', function () {
-        console.log('$viewContentLoaded');
-    });
+    var setView = function (view) {
+        $scope.list_view        = view === 'list';
+        $scope.big_list_view    = view === 'big-list';
+        $scope.tile_view        = view === 'tile';
+    }
 
     $http.get('/api/profile/' + $routeParams.userid).success(function (data) {
         $http.get('/api/permissions/edit/' + $routeParams.userid).success(function (permissions) {
-            $scope.user = data.user;
-            $scope.player = data.player;
-            $scope.library = data.library;
-            $scope.list_view = data.list_view;
-            $scope.big_list_view = data.big_list_view;
-            $scope.tile_view = data.tile_view;
-            $scope.read_only = !permissions.hasPermission;
+            $scope.user         = data.user;
+            $scope.player       = data.player;
+            $scope.library      = data.library;
+            $scope.read_only    = !permissions.hasPermission;
+
+            setView($rootScope.session.view);
 
             setTimeout(function () { 
                 $scope.$apply(function () {
@@ -29,6 +30,19 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
         if ($event.originalEvent.target.tagName !== 'INPUT') {
             game.completed = !game.completed;
         }
+    }
+
+    $scope.changeView = function (view) {
+        $scope.loaded = false;
+        $http.put('/api/session/view/' + view).success(function () {
+            setView(view);
+
+            setTimeout(function () { 
+                $scope.$apply(function () {
+                    $scope.loaded = true;
+                });
+            }, 1000);
+        });
     }
 });
 

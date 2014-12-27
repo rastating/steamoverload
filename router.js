@@ -125,10 +125,7 @@ router.get('/api/profile/:steamid', function (req, res) {
                 res.send({
                     "user": req.user, 
                     "player": user,
-                    "library": library, 
-                    "list_view": req.cookies.view === "list" || !req.cookies.view,
-                    "big_list_view": req.cookies.view === "big-list",
-                    "tile_view": req.cookies.view === "tile"
+                    "library": library
                 });
             }
             else {
@@ -147,9 +144,10 @@ router.get('/api/permissions/edit/:steamid', function (req, res) {
     res.send({ "hasPermission": canEdit });
 });
 
-router.get('/api/view/:viewid', function (req, res) {
+router.put('/api/session/view/:viewid', function (req, res) {
     res.cookie('view', req.params.viewid);
-    res.redirect('back');
+    req.session.view = req.params.viewid;
+    res.send({ "result": 'ok' });
 });
 
 router.get('/api/session', function (req, res) {
@@ -162,6 +160,7 @@ router.get('/api/session', function (req, res) {
 
     res.send({ 
         "authenticated": authenticated, 
+        "view": req.cookies.view || req.session.view,
         "user": {
             "id": id
         }

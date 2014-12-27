@@ -33,9 +33,9 @@ app.config(function ($routeProvider, $locationProvider) {
 
 app.run(function ($rootScope, $location, $session) {
     $rootScope.logout = function () {
-        console.log('$rootScope.logout');
         $session.destroy().then(function () {
-            $rootScope.session = { "authenticated": false, "user": {} };
+            $rootScope.session.authenticated = false;
+            $rootScope.session.user = {};
         });
     };
 

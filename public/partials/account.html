@@ -24,13 +24,13 @@
                 <div class="pagination">
                     <ul>
                         <li ng-class="{ 'active': list_view }">
-                            <a target="_self" href="/api/view/list"><i class="fa fa-list"></i></a>
+                            <a ng-click="changeView('list')"><i class="fa fa-list"></i></a>
                         </li>
                         <li ng-class="{ 'active': big_list_view }">
-                            <a target="_self" href="/api/view/big-list"><i class="fa fa-th-list"></i></a>
+                            <a ng-click="changeView('big-list')"><i class="fa fa-th-list"></i></a>
                         </li>
                         <li ng-class="{ 'active': tile_view }">
-                            <a target="_self" href="/api/view/tile"><i class="fa fa-th"></i></a>
+                            <a ng-click="changeView('tile')"><i class="fa fa-th"></i></a>
                         </li>
                     </ul>
                 </div>

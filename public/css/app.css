@@ -259,3 +259,7 @@ label.checkbox {
     opacity: 1;
     visibility: visible;
 }
+
+.pagination > ul > li > a {
+    cursor: pointer;
+}
