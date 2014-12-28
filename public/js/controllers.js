@@ -9,6 +9,10 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
         $scope.tile_view        = view === 'tile';
     }
 
+    var calculatePercentage = function (count, total) {
+        return Math.floor((count / total) * 100);
+    };
+
     $rootScope.$watch('session', function (newValue, oldValue) {
         if (!newValue.authenticated) {
             $scope.read_only = true;
@@ -38,9 +42,13 @@ controllers.controller('AccountCtrl', function ($rootScope, $scope, $routeParams
                 game.completed = !game.completed;
                 if (game.completed) {
                     $http.post('/api/profile/games/' + game.appid);
+                    $scope.library.completed_count += 1;
+                    $scope.library.completion_percent = calculatePercentage($scope.library.completed_count, $scope.library.game_count);
                 }
                 else {
                     $http.delete('/api/profile/games/' + game.appid);
+                    $scope.library.completed_count -= 1;
+                    $scope.library.completion_percent = calculatePercentage($scope.library.completed_count, $scope.library.game_count);
                 }
             }
         }

@@ -109,6 +109,19 @@ var loadCompletedGames = function (steamID, callback) {
     });
 };
 
+var removeCompletionRecord = function (steamID, appid) {
+    var db = module.exports.db;
+    console.log('INFO   Removing invalid completion record ' + steamID +' : ' + appid);
+    db.collection('completed_games').remove({ "steam_id": steamID, "appid": appid }, function (error, result) {
+        if (!error) {
+            console.log('INFO    Removed invalid completion record ' + steamID + ' : ' + appid);
+        }
+        else {
+            console.log('ERROR   Failed to remove invalid completion record ' + steamID + ' : ' + appid);
+        }
+    });
+};
+
 var loadLibrary = function (steamID, callback) {
     var db = module.exports.db;
     var collection = db.collection('libraries');
@@ -127,14 +140,24 @@ var loadLibrary = function (steamID, callback) {
             loadCompletedGames(steamID, function (error, completed) {
                 if (!error && completed && completed.length > 0) {
                     var games = doc.games;
+                    var invalidCompletions = 0;
 
                     // Set the completed flag on games that appear in both arrays.
-                    for (var gameIndex = 0; gameIndex < games.length; gameIndex++) {
-                        for (var completedIndex = 0; completedIndex < completed.length; completedIndex++) {
+                    for (var completedIndex = 0; completedIndex < completed.length; completedIndex++) {
+                        // We need to update this flag so we know whether or not to dump bad data.
+                        var isValidCompletion = false;
+
+                        for (var gameIndex = 0; gameIndex < games.length; gameIndex++) {
                             if (games[gameIndex].appid == completed[completedIndex].appid) {
                                 games[gameIndex].completed = true;
+                                isValidCompletion = true;
                                 break;
                             }
+                        }
+
+                        if (!isValidCompletion) {
+                            invalidCompletions += 1;
+                            removeCompletionRecord(steamID, completed[completedIndex].appid);
                         }
                     }
                 }
@@ -143,7 +166,7 @@ var loadLibrary = function (steamID, callback) {
                 }
 
                 // Calculate and assign completion figures.
-                doc.completed_count = completed.length;
+                doc.completed_count = completed.length - invalidCompletions;
                 doc.completion_percent = 0;
                 if (doc.completed_count > 0 && doc.game_count > 0) {
                     doc.completion_percent = Math.floor((doc.completed_count / doc.game_count) * 100);
