@@ -109,19 +109,6 @@ var loadCompletedGames = function (steamID, callback) {
     });
 };
 
-var removeCompletionRecord = function (steamID, appid) {
-    var db = module.exports.db;
-    console.log('INFO   Removing invalid completion record ' + steamID +' : ' + appid);
-    db.collection('completed_games').remove({ "steam_id": steamID, "appid": appid }, function (error, result) {
-        if (!error) {
-            console.log('INFO    Removed invalid completion record ' + steamID + ' : ' + appid);
-        }
-        else {
-            console.log('ERROR   Failed to remove invalid completion record ' + steamID + ' : ' + appid);
-        }
-    });
-};
-
 var loadLibrary = function (steamID, callback) {
     var db = module.exports.db;
     var collection = db.collection('libraries');
@@ -157,7 +144,6 @@ var loadLibrary = function (steamID, callback) {
 
                         if (!isValidCompletion) {
                             invalidCompletions += 1;
-                            removeCompletionRecord(steamID, completed[completedIndex].appid);
                         }
                     }
                 }
@@ -281,11 +267,28 @@ var loadMostCompletedGames = function (callback) {
 
 var completeGame = function (steamID, gameID) {
     var db = module.exports.db;
-    var collection = db.collection('completed_games');
+    var completions = db.collection('completed_games');
+    var libraries = db.collection('libraries');
     var object = { "steam_id": steamID, "appid": gameID, "completed_at": Date.now() };
-    collection.update(object, { $set: object }, { upsert: true }, function (error) {
-        if (error) {
-            console.log(error);
+
+    libraries.findOne({ "steam_id": steamID }, function (error, library) {
+        if (!error) {
+            var completed = false;
+            for (var i = 0; i < library.games.length; i++) {
+                if (library.games[i].appid == gameID) {
+                    completions.update(object, { $set: object }, { upsert: true }, function (error) {
+                        if (error) {
+                            console.log(error);
+                        }
+                    });
+                    completed = true;
+                    break;
+                }
+            }
+
+            if (!completed) {
+                console.log('INFO   Dropped completion of ' + gameID + ' by ' + steamID);
+            }
         }
     });
 };
