@@ -147,8 +147,9 @@ var loadLibrary = function (steamID, callback) {
                         }
                     }
                 }
-                else {
+                else if (error) {
                     callback(error, null);
+                    return;
                 }
 
                 // Calculate and assign completion figures.

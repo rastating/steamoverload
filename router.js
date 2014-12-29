@@ -119,7 +119,7 @@ router.get('/api/profile/:steamid', function (req, res) {
         if (error) {
             console.log('INFO   Failed to load library for ' + req.params.steamid + ': ' + error);
         }
-        
+
         module.exports.user.load(req.params.steamid, function (error, user) {
             if (!error) {
                 res.send({
