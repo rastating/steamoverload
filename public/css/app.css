@@ -1,76 +1,10 @@
-html {
-    position: relative;
-    min-height: 100%;
-}
-
-body {
-    margin-bottom: 80px;
-}
-
-.title {
-    font: 900 60px/70px "Helvetica Neue", Helvetica, Arial, sans-serif;
-    letter-spacing: -2px;
-    margin: 0;
-}
-
-.btn-signin {
-    margin: 10px 0;
-    margin-bottom: 0px;
-}
-
-h2.lead {
-    margin-bottom: 10px;
-    margin-top: 10px;
-}
-
-.slogan {
-    color: rgba(52, 73, 94, 0.30000000000000004);
-    display: block;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 0;
-    padding-top: 0px;
-}
-        
-#footer {
-    position: absolute;
-    bottom: 0;
-    height: 70px;
-    background-color: #f5f5f5;
-    width: 100%;
-}
-
-.header {
-    padding-top: 100px; 
-}
-
-#footer .container .text-muted  {
-    text-align: right; 
-    padding-top: 20px;
-}
-
-.header.slim div img {
-    float: left;
-    height: 40px;
-}
-
-.header.slim div .nav-buttons {
-    float: right;
-}
-
-.header.slim {
-    padding-top: 15px;
-    padding-bottom: 15px;
-}
 
 .library-thumbnails {
     display: none;
     margin: 0 auto;
 }
 
-.loading-notice {
-    text-align: center;
-}
+
 
 .thumbnail-overlay {
     cursor: pointer;
@@ -90,10 +24,6 @@ h2.lead {
     filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#f2FFFFFF, endColorstr=#f2FFFFFF);
     /* IE8 */    
     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#f2FFFFFF, endColorstr=#f2FFFFFF)";
-}
-
-label.checkbox {
-    cursor: pointer;
 }
 
 .thumbnail-overlay .fa {
@@ -149,10 +79,6 @@ label.checkbox {
     .summary p.lead {
         margin-bottom: 20px;
     }
-
-    .header {
-        text-align: center;
-    }
 }
 
 @media only screen and (min-width : 768px) {
@@ -164,10 +90,6 @@ label.checkbox {
 @media only screen and (min-width : 992px) {
     .library-thumbnails {
         width: 922px;
-    }
-
-    .header {
-        text-align: left;
     }
 }
 
