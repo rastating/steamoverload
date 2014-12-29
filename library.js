@@ -125,9 +125,9 @@ var loadLibrary = function (steamID, callback) {
             }
 
             loadCompletedGames(steamID, function (error, completed) {
+                var invalidCompletions = 0;
                 if (!error && completed && completed.length > 0) {
                     var games = doc.games;
-                    var invalidCompletions = 0;
 
                     // Set the completed flag on games that appear in both arrays.
                     for (var completedIndex = 0; completedIndex < completed.length; completedIndex++) {
