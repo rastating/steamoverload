@@ -33,3 +33,24 @@ h2.lead {
 .loading-notice {
     text-align: center;
 }
+
+h2.username {
+    @media screen and (min-width : 480px) {
+        margin-bottom: 5px;
+    }
+}
+
+.summary {
+    padding-bottom: 25px;
+
+    p.lead {
+        @media screen and (min-width : 480px) {
+            margin-bottom: 20px;
+        }
+    }
+
+    .avatar {
+        float: left;
+        margin-right: 25px;
+    }
+}

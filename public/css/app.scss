@@ -1,11 +1,14 @@
 
 /* Utilities */
-@import "utilities/mixins"
+@import "utilities/mixins";
 
 /* Atoms */
 @import "atoms/buttons";
 @import "atoms/headings";
 @import "atoms/misc";
+
+/* Molecules */
+@import "molecules/animation";
 
 /* Organisms */
 @import "organisms/footer";
