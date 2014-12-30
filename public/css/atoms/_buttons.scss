@@ -1,0 +1,14 @@
+.btn-signin {
+    margin: 10px 0;
+    margin-bottom: 0px;
+}
+
+.pagination ul {
+    @media screen and (max-width: 767px) {
+        padding: inherit !important;
+    }
+}
+
+.pagination > ul > li > a {
+    cursor: pointer;
+}

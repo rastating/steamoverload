@@ -1,0 +1,11 @@
+.animated.gone {
+    opacity: 0;
+    visibility: hidden;
+    display: block;
+}
+
+.animated.visible {
+    @include transition(opacity, 1s, linear);
+    opacity: 1;
+    display: block;
+}
